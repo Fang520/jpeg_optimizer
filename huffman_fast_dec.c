@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <assert.h>
 #include "huffman_fast_dec.h"
+#include "canonical_huffman.h"
 
 #define MAX(a,b) ((a) > (b) ? (a) : (b))
 #define MIN(a,b) ((a) > (b) ? (b) : (a))
@@ -13,26 +14,6 @@ typedef struct {
 	uint16_t symbol;
 	uint32_t code;
 } VLCcode;
-
-static void ff_mjpeg_build_huffman_codes(uint8_t *huff_size, uint16_t *huff_code,
-	const uint8_t *bits_table,
-	const uint8_t *val_table)
-{
-	int i, j, k, nb, code, sym;
-
-	code = 0;
-	k = 0;
-	for (i = 0; i < 16; i++) {
-		nb = bits_table[i];
-		for (j = 0; j<nb; j++) {
-			sym = val_table[k++];
-			huff_size[sym] = i + 1;
-			huff_code[sym] = code;
-			code++;
-		}
-		code <<= 1;
-	}
-}
 
 static int alloc_table(VLC *vlc, int size)
 {
@@ -46,11 +27,6 @@ static int alloc_table(VLC *vlc, int size)
 			return -1;
 	}
 	return index;
-}
-
-static void ff_free_vlc(VLC *vlc)
-{
-	free(&vlc->table);
 }
 
 static int build_table(VLC *vlc, int table_nb_bits, int nb_codes, VLCcode *codes)
@@ -189,7 +165,7 @@ int build_vlc(VLC *vlc, const uint8_t *bits_table, const uint8_t *val_table, int
 
 	assert(nb_codes <= 256);
 
-	ff_mjpeg_build_huffman_codes(huff_size, huff_code, bits_table, val_table);
+	make_canonical_huffman_codes(huff_size, huff_code, bits_table, val_table);
 
 	for (i = 0; i < 256; i++)
 		huff_sym[i] = i + 16 * is_ac;

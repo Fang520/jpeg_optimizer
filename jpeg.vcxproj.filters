@@ -33,6 +33,12 @@
     <ClCompile Include="jpeg_otimizer.c">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="canonical_huffman.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="bitstream.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="parse_header.h">
@@ -51,6 +57,12 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="jpeg_optimizer.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="canonical_huffman.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="bitstream.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

@@ -64,7 +64,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="bitstream.c" />
     <ClCompile Include="build_opt_header.c" />
+    <ClCompile Include="canonical_huffman.c" />
     <ClCompile Include="huffman_fast_dec.c" />
     <ClCompile Include="jpeg_otimizer.c" />
     <ClCompile Include="parse_header.c">
@@ -74,7 +76,9 @@
     <ClCompile Include="std_quant_table.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="bitstream.h" />
     <ClInclude Include="build_opt_header.h" />
+    <ClInclude Include="canonical_huffman.h" />
     <ClInclude Include="huffman_fast_dec.h" />
     <ClInclude Include="jpeg_optimizer.h" />
     <ClInclude Include="parse_header.h" />

@@ -49,30 +49,40 @@ static void free_ctx(jpeg_ctx_t *ctx)
 		free(ctx->dec_vlcs[1][0].table);
 	if (ctx->dec_vlcs[1][1].table)
 		free(ctx->dec_vlcs[1][1].table);
+	if (ctx->in_buf)
+		free(ctx->in_buf);
 	free(ctx);
 }
 
-static int init_dec_bit_stream(jpeg_ctx_t *ctx, uint8_t *buf, int len)
+static int init_dec_bit_stream(jpeg_ctx_t *ctx, const uint8_t *buf, int len)
 {
-	const uint8_t *src = buf_ptr;
-	uint8_t *dst = s->buffer;
+	uint8_t *src, *dst, *x;
 
-	while (src < buf_end)
+	ctx->in_buf = (uint8_t*)malloc(len);
+	if (!ctx->in_buf)
+		return -1;
+
+	src = buf;
+	dst = ctx->in_buf;
+
+	while (src - buf < len)
 	{
-		uint8_t x = *(src++);
-		*(dst++) = x;
-			if (x == 0xff) 
-			{
-				while (src < buf_end && x == 0xff)
-					x = *(src++);
-				if (x >= 0xd0 && x <= 0xd7)
-					*(dst++) = x;
-				else if (x)
-					break;
-			}
+		x = *src++;
+		*dst++ = x;
+		if (x == 0xff) 
+		{
+			while (src - buf < len && x == 0xff)
+				x = *src++;
+			if (x == 0)
+				continue;
+			else if (x >= 0xd0 && x <= 0xd7)
+				dst--;
+			else
+				break;
+		}
 	}
 
-	init_get_bits(&ctx->dec_bit_ctx, buf, len * 8);
+	init_get_bits(&ctx->dec_bit_ctx, ctx->in_buf, (dst - ctx->in_buf) * 8);
 
 	return 0;
 }

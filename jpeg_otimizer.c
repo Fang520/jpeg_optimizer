@@ -52,14 +52,28 @@ static void free_ctx(jpeg_ctx_t *ctx)
 	free(ctx);
 }
 
-static int process_mb(jpeg_ctx_t *ctx)
+/* 0=ok -1=err 1=end*/
+static int process_mb(jpeg_ctx_t *ctx, int yuv_index)
 {
+
 
 }
 
 /* 0=ok -1=err 1=end*/
 static int process_mcu(jpeg_ctx_t *ctx)
 {
+	int i, j, ret;
+	for (i = 0; i < 3; i++)
+	{
+		for (j = 0; j < ctx->rate_h[i] * ctx->rate_v[i]; j++)
+		{
+			ret = process_mb(ctx, i);
+			if (ret == 1)
+				return 0;
+			else if (ret == -1)
+				return -1;
+		}
+	}
 	return 0;
 }
 

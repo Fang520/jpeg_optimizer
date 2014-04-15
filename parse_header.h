@@ -1,3 +1,6 @@
+#ifndef PARSE_HEADER_H
+#define PARSE_HEADER_H
+
 #include <stdint.h>
 #include "jpeg_optimizer.h"
 
@@ -13,4 +16,6 @@
 #define ERR_EOI					-10
 
 int parse_header(jpeg_ctx_t *ctx, const uint8_t *data, int data_len);
+
+#endif
 

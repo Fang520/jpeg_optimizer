@@ -69,6 +69,7 @@
     <ClCompile Include="canonical_huffman.c" />
     <ClCompile Include="huffman_fast_dec.c" />
     <ClCompile Include="jpeg_otimizer.c" />
+    <ClCompile Include="main.c" />
     <ClCompile Include="parse_header.c">
       <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableAllWarnings</WarningLevel>
     </ClCompile>

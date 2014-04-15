@@ -1,3 +1,6 @@
+#ifndef BITSTREAM_H
+#define BITSTREAM_H
+
 #include <stdint.h>
 
 typedef struct PutBitContext {
@@ -13,3 +16,5 @@ void flush_put_bits(PutBitContext *s);
 void put_bits(PutBitContext *s, int n, unsigned int value);
 void put_sbits(PutBitContext *pb, int n, int32_t value);
 void put_bits32(PutBitContext *s, uint32_t value);
+
+#endif

@@ -3,14 +3,14 @@
 
 #include <stdint.h>
 
-typedef struct PutBitContext {
+typedef struct {
 	uint32_t bit_buf;
 	int bit_left;
 	uint8_t *buf, *buf_ptr, *buf_end;
 	int size_in_bits;
 } PutBitContext;
 
-typedef struct GetBitContext {
+typedef struct {
 	const uint8_t *buffer, *buffer_end;
 	int index;
 	int size_in_bits;

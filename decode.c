@@ -58,6 +58,18 @@ int close_dec_bitstream(jpeg_ctx_t *ctx)
 
 int decode_dc(jpeg_ctx_t *ctx, int yuv_index, uint16_t mb[])
 {
+	int code;
+
+	code = get_vlc(&ctx->dec_bit_ctx, ctx->dec_vlcs[yuv_index][0].table, 9, 2);
+	if (code < 0) 
+	{
+		return 0xffff;
+	}
+
+	if (code)
+		return get_xbits(&ctx->dec_bit_ctx, code);
+	else
+		return 0;
 	return 0;
 }
 

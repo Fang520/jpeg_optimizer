@@ -187,7 +187,7 @@ int get_vlc(GetBitContext *s, int16_t(*table)[2], int bits, int max_depth)
 
 	unsigned int re_index = s->index;
 	int re_cache = 0;
-	re_cache = bswap32((uint32_t)(((const uint8_t *)(s)->buffer) + (re_index >> 3))) << (re_index & 0x07);
+	re_cache = bswap32(*(uint32_t*)(((const uint8_t *)(s)->buffer) + (re_index >> 3))) << (re_index & 0x07);
 
 	int n, nb_bits;
 	unsigned int index;
@@ -197,7 +197,7 @@ int get_vlc(GetBitContext *s, int16_t(*table)[2], int bits, int max_depth)
 	if (max_depth > 1 && n < 0)
 	{
 		re_index += bits;
-		re_cache = bswap32((uint32_t)(((const uint8_t *)(s)->buffer) + (re_index >> 3))) << (re_index & 0x07);
+		re_cache = bswap32(*(uint32_t*)(((const uint8_t *)(s)->buffer) + (re_index >> 3))) << (re_index & 0x07);
 		nb_bits = -n;
 		index = (((uint32_t)re_cache) >> (32 - nb_bits)) + code;
 		code = table[index][0];
@@ -205,7 +205,7 @@ int get_vlc(GetBitContext *s, int16_t(*table)[2], int bits, int max_depth)
 		if (max_depth > 2 && n < 0)
 		{
 			re_index += nb_bits;
-			re_cache = bswap32((uint32_t)(((const uint8_t *)(s)->buffer) + (re_index >> 3))) << (re_index & 0x07);
+			re_cache = bswap32(*(uint32_t*)(((const uint8_t *)(s)->buffer) + (re_index >> 3))) << (re_index & 0x07);
 			nb_bits = -n;
 			index = (((uint32_t)re_cache) >> (32 - nb_bits)) + code;
 			code = table[index][0];

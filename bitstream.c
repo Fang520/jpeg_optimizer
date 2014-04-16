@@ -104,7 +104,7 @@ int get_bit(GetBitContext *s, int n)
 	register int32_t cache;
 	unsigned int re_index = s->index;
 	int re_cache = 0;
-	re_cache = bswap32((uint32_t)(((const uint8_t *)(s)->buffer) + (re_index >> 3))) << (re_index & 0x07);
+	re_cache = bswap32(*(uint32_t*)(((const uint8_t *)(s)->buffer) + (re_index >> 3))) << (re_index & 0x07);
 	cache = (uint32_t)re_cache;
 	sign = (~cache) >> 31;
 	re_index += n;

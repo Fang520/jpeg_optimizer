@@ -15,6 +15,11 @@ typedef struct {
 	uint32_t code;
 } VLCcode;
 
+static uint32_t bswap32(uint32_t x)
+{
+	return ((((x) << 8 & 0xff00) | ((x) >> 8 & 0x00ff)) << 16 | ((((x) >> 16) << 8 & 0xff00) | (((x) >> 16) >> 8 & 0x00ff)));
+}
+
 static int alloc_table(VLC *vlc, int size)
 {
 	int index;
@@ -176,65 +181,39 @@ int build_vlc(VLC *vlc, const uint8_t *bits_table, const uint8_t *val_table, int
 	return ff_init_vlc_sparse(vlc, 9, nb_codes, huff_size, huff_code, huff_sym);
 }
 
-static uint32_t bswap32(uint32_t x)
-{
-	return ((((x) << 8 & 0xff00) | ((x) >> 8 & 0x00ff)) << 16 | ((((x) >> 16) << 8 & 0xff00) | (((x) >> 16) >> 8 & 0x00ff)));
-}
-
 int get_vlc(GetBitContext *s, int16_t(*table)[2], int bits, int max_depth)
 {
 	int code;
 
-	unsigned int re_index = (s)->index;
-	unsigned int re_cache = 0;
-	unsigned int re_size_plus8 = (s)->size_in_bits_plus8;
-	re_cache = bswap32((uint32_t)((s)->buffer + (re_index >> 3))) << (re_index & 7);
+	unsigned int re_index = s->index;
+	int re_cache = 0;
+	re_cache = bswap32((uint32_t)(((const uint8_t *)(s)->buffer) + (re_index >> 3))) << (re_index & 0x07);
 
-	do {
-		int n, nb_bits;
-		unsigned int index;
-		index = (((uint32_t)(re_cache)) >> (32 - (bits)));
+	int n, nb_bits;
+	unsigned int index;
+	index = (((uint32_t)(re_cache)) >> (32 - bits));
+	code = table[index][0];
+	n = table[index][1];
+	if (max_depth > 1 && n < 0)
+	{
+		re_index += bits;
+		re_cache = bswap32((uint32_t)(((const uint8_t *)(s)->buffer) + (re_index >> 3))) << (re_index & 0x07);
+		nb_bits = -n;
+		index = (((uint32_t)re_cache) >> (32 - nb_bits)) + code;
 		code = table[index][0];
 		n = table[index][1];
-		if (max_depth > 1 && n < 0) {
-			re_index = ((re_size_plus8) >(re_index + (bits)) ? (re_index + (bits)) : (re_size_plus8));
-			re_cache = bswap32((uint32_t)((s)->buffer + (re_index >> 3))) << (re_index & 7);
+		if (max_depth > 2 && n < 0)
+		{
+			re_index += nb_bits;
+			re_cache = bswap32((uint32_t)(((const uint8_t *)(s)->buffer) + (re_index >> 3))) << (re_index & 0x07);
 			nb_bits = -n;
-			index = (((uint32_t)(re_cache)) >> (32 - (nb_bits))) + code;
+			index = (((uint32_t)re_cache) >> (32 - nb_bits)) + code;
 			code = table[index][0];
 			n = table[index][1];
-			if (max_depth >
-				2 && n < 0) {
-				re_index = ((re_size_plus8) >(re_index + (nb_bits)) ? (re_index + (nb_bits)) : (re_size_plus8));
-				re_cache = bswap32((uint32_t)((s)->buffer + (re_index >> 3))) << (re_index & 7);
-				nb_bits = -n;
-				index = (((uint32_t)(re_cache)) >> (32 - (nb_bits))) + code;
-				code = table[index][0];
-				n = table[index][
-					1];
-			}
 		}
-		do {
-			re_cache <<= (n);
-			re_index = ((re_size_plus8) > (re_index + (n)) ? (re_index + (n)) : (re_size_plus8));
-		} while (0);
-	} while (0);
-
-	(s)->index = re_index;
+	}
+	re_cache <<= n;
+	re_index += n;
+	s->index = re_index;
 	return code;
-}
-
-int get_xbits(GetBitContext *s, int n)
-{
-	register int sign;
-	register int32_t cache;
-	unsigned int re_index = (s)->index;
-	unsigned int re_cache = 0;
-	unsigned int re_size_plus8 = (s)->size_in_bits_plus8;
-	re_cache = bswap32((uint32_t)((s)->buffer + (re_index >> 3))) << (re_index & 7);
-	cache = ((uint32_t)re_cache);
-	sign = ~cache >> 31;
-	re_index = ((re_size_plus8) > (re_index + (n)) ? (re_index + (n)) : (re_size_plus8));
-	(s)->index = re_index;
-	return ((((uint32_t)(sign ^ cache)) >> (32 - (n))) ^ sign) - sign;
 }

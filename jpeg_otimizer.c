@@ -53,7 +53,7 @@ static int process_mcu(jpeg_ctx_t *ctx)
 	{
 		for (j = 0; j < ctx->rate_h[i] * ctx->rate_v[i]; j++)
 		{
-			ret = process_mb(ctx, i ? 1 : 0);
+			ret = process_mb(ctx, i);
 			if (ret == 1)
 				return 0;
 			else if (ret == -1)
@@ -97,6 +97,7 @@ int optimize_jpeg(const uint8_t *input, int input_len, uint8_t *output, int *out
 	ctx = (jpeg_ctx_t *)malloc(sizeof(jpeg_ctx_t));
 	if (!ctx)
 		return -1;
+	memset(ctx, 0, sizeof(jpeg_ctx_t));
 	ctx->qscale = qscale;
 
 	ret = parse_header(ctx, input, input_len);

@@ -67,6 +67,8 @@
     <ClCompile Include="bitstream.c" />
     <ClCompile Include="build_opt_header.c" />
     <ClCompile Include="canonical_huffman.c" />
+    <ClCompile Include="decode.c" />
+    <ClCompile Include="encode.c" />
     <ClCompile Include="huffman_fast_dec.c" />
     <ClCompile Include="jpeg_otimizer.c" />
     <ClCompile Include="main.c" />
@@ -80,6 +82,8 @@
     <ClInclude Include="bitstream.h" />
     <ClInclude Include="build_opt_header.h" />
     <ClInclude Include="canonical_huffman.h" />
+    <ClInclude Include="decode.h" />
+    <ClInclude Include="encode.h" />
     <ClInclude Include="huffman_fast_dec.h" />
     <ClInclude Include="jpeg_optimizer.h" />
     <ClInclude Include="parse_header.h" />

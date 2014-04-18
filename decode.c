@@ -58,22 +58,90 @@ int close_dec_bitstream(jpeg_ctx_t *ctx)
 
 int decode_dc(jpeg_ctx_t *ctx, int yuv_index, uint16_t mb[])
 {
-	int code;
-
-	code = get_vlc(&ctx->dec_bit_ctx, ctx->dec_vlcs[yuv_index][0].table, 9, 2);
-	if (code < 0) 
-	{
-		return 0xffff;
-	}
-
-	if (code)
-		return get_xbits(&ctx->dec_bit_ctx, code);
-	else
-		return 0;
+	int len, val;
+	uint8_t *dqt;
+	dqt = ctx->dqt[ctx->qt_index[yuv_index]];
+	len = get_vlc(&ctx->dec_bit_ctx, ctx->dec_vlcs[0][yuv_index ? 1 : 0].table, 9, 2);
+	if (len < 0)
+		return -1;
+	val = get_bits(&ctx->dec_bit_ctx, len);
+	val = val * dqt[0] + ctx->last_dc[yuv_index];
+	ctx->last_dc[yuv_index] = val;
+	mb[0] = val;
 	return 0;
 }
 
 int decode_ac(jpeg_ctx_t *ctx, int yuv_index, uint16_t mb[])
 {
-	return 0;
+	int n, nb_bits;
+	unsigned int index;
+	GetBitContext *gb;
+	gb = &ctx->dec_bit_ctx;
+	uint32_t re_index; 
+	int re_cache;
+	int i;
+
+	i = 0;
+	re_index = gb->index;
+	re_cache = 0;
+	for (;;)
+	{
+		sdfjsdkfsad;flsjkdfklsdjf
+		re_cache = bswap32(*(uint32_t*)(((const uint8_t *)gb->buffer) + (re_index >> 3))) << (re_index & 0x07);
+
+		index = (((uint32_t)(re_cache)) >> (32 - 9));
+		code = ctx->dec_vlcs[1][yuv_index ? 1 : 0].table[index][0];
+		n = ctx->dec_vlcs[1][yuv_index ? 1 : 0].table[index][1];
+		if (2 > 1 && n < 0)
+		{
+			re_index += (9);
+			re_cache = av_bswap32((((const union unaligned_32 *) (((const uint8_t *)(&s->gb)->buffer) + (re_index >> 3)))->l)) << (re_index & 0x07);
+			nb_bits = -n;
+			index = (((uint32_t)(re_cache)) >> (32 - (nb_bits))) + code;
+			code = s->vlcs[1][ac_index].table[index][0];
+			n = s->vlcs[1][ac_index].table[index][1];
+			if (2 > 2 && n < 0)
+			{
+				re_index += (nb_bits);
+				re_cache = av_bswap32((((const union unaligned_32 *) (((const uint8_t *)(&s->gb)->buffer) + (re_index >> 3)))->l)) << (re_index & 0x07);
+				nb_bits = -n;
+				index = (((uint32_t)(re_cache)) >> (32 - (nb_bits))) + code;
+				code = s->vlcs[1][ac_index].table[index][0];
+				n = s->vlcs[1][ac_index].table[index][1];
+			}
+		}
+		re_cache <<= (n);
+		re_index += (n);
+
+		if (code == 0x10)
+			break;
+		i += ((unsigned)code) >> 4;
+		if (code != 0x100)
+		{
+			code &= 0xf;
+			if (code > 25 - 16)
+			{
+				re_cache = av_bswap32((((const union unaligned_32 *) (((const uint8_t *)(&s->gb)->buffer) + (re_index >> 3)))->l)) << (re_index & 0x07);
+			}
+			int cache = ((uint32_t)re_cache);
+			int sign = (~cache) >> 31;
+			level = ((((uint32_t)(sign ^ cache)) >> (32 - (code))) ^ sign) - sign;
+
+			re_index += (code);
+
+			if (i >= 63)
+			{
+				if (i == 63)
+				{
+					j = s->scantable.permutated[63];
+					block[j] = level * quant_matrix[j];
+					break;
+				}
+				av_log(s->avctx, 16, "error count: %d\n", i);
+				return -1;
+			}
+			j = s->scantable.permutated[i];
+			block[j] = level * quant_matrix[j];
+		}
+	}
 }

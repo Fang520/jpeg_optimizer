@@ -42,6 +42,12 @@
     <ClCompile Include="main.c">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="decode.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="encode.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="parse_header.h">
@@ -66,6 +72,12 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="bitstream.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="decode.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="encode.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

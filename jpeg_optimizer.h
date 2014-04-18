@@ -32,7 +32,7 @@ typedef struct {
 	int width;
 	int dri;
 	int qscale;
-	dht_dc_t dht_dc[2];
+	dht_dc_t dht_dc[2]; 
 	dht_ac_t dht_ac[2];
 	dht_dc_hash_t dht_dc_hash[2];
 	dht_ac_hash_t dht_ac_hash[2];
@@ -47,6 +47,7 @@ typedef struct {
 	PutBitContext enc_bit_ctx;
 	GetBitContext dec_bit_ctx;
 	VLC dec_vlcs[2][2];
+	int last_dc[3];
 } jpeg_ctx_t;
 
 int optimize_jpeg(const uint8_t *input, int input_len, uint8_t *output, int *output_len, int qscale);

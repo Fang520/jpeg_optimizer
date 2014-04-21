@@ -98,7 +98,7 @@ void init_get_bits(GetBitContext *s, const uint8_t *buffer, int bit_size)
 	s->index = 0;
 }
 
-int get_bit(GetBitContext *s, int n)
+int get_bits(GetBitContext *s, int n)
 {
 	register int sign;
 	register int32_t cache;

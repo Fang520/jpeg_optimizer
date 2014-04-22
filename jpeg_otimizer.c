@@ -38,11 +38,12 @@ static int re_quantize(jpeg_ctx_t *ctx, uint16_t mb[])
 static int process_mb(jpeg_ctx_t *ctx, int yuv_index)
 {
 	uint16_t mb[64];
-	decode_dc(ctx, yuv_index, mb);
-	decode_ac(ctx, yuv_index, mb);
-	re_quantize(ctx, mb);
-	encode_dc(ctx, yuv_index, mb);
-	encode_dc(ctx, yuv_index, mb);
+	memset(mb, 0, sizeof(mb));
+	if (decode_dc(ctx, yuv_index, mb) < 0) return -1;
+	if (decode_ac(ctx, yuv_index, mb) < 0) return -1;
+	//re_quantize(ctx, mb);
+	//encode_dc(ctx, yuv_index, mb);
+	//encode_dc(ctx, yuv_index, mb);
 }
 
 /* 0=ok -1=err 1=end*/
@@ -53,6 +54,7 @@ static int process_mcu(jpeg_ctx_t *ctx)
 	{
 		for (j = 0; j < ctx->rate_h[i] * ctx->rate_v[i]; j++)
 		{
+			printf("---mb, index=%d\n", i);
 			ret = process_mb(ctx, i);
 			if (ret == 1)
 				return 0;
@@ -101,7 +103,7 @@ int optimize_jpeg(const uint8_t *input, int input_len, uint8_t *output, int *out
 	ctx->qscale = qscale;
 
 	ret = parse_header(ctx, input, input_len);
-	if (ret < 0)
+	if (ret <= 0)
 	{
 		free_ctx(ctx);
 		return -1;

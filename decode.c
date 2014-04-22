@@ -65,13 +65,15 @@ int decode_dc(jpeg_ctx_t *ctx, int yuv_index, uint16_t mb[])
 {
 	int len, val;
 	uint8_t *dqt;
+
 	dqt = ctx->dqt[ctx->qt_index[yuv_index]];
+
 	len = get_vlc(&ctx->dec_bit_ctx, ctx->dec_vlcs[0][yuv_index ? 1 : 0].table, 9, 2);
 	if (len < 0)
 		return -1;
 	if (len)
 	{
-		val = get_bits(&ctx->dec_bit_ctx, len);
+		val = get_xbits(&ctx->dec_bit_ctx, len);
 		val = val * dqt[0] + ctx->last_dc[yuv_index];
 		ctx->last_dc[yuv_index] = val;
 		mb[0] = val;
@@ -128,11 +130,12 @@ int decode_ac(jpeg_ctx_t *ctx, int yuv_index, uint16_t mb[])
 			int sign = (~cache) >> 31;
 			level = (((uint32_t)(sign ^ cache)) >> (32 - code)) ^ sign - sign;
 
+			printf("index=%d level=%d ", yuv_index, level);
+
 			re_index += code;
 
 			if (i > 63)
 			{
-				printf("error count: %d\n", i);
 				return -1;
 			}
 			mb[i] = level * dqt[i];

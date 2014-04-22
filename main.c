@@ -5,8 +5,8 @@
 
 int main(int argc, char** argv)
 {
-	uint8_t *filename_in = "d:\\a.jpg";
-	uint8_t *filename_out = "d:\\a_opt.jpg";
+	uint8_t *filename_in = "d:\\mini.jpg";
+	uint8_t *filename_out = "d:\\mini_opt.jpg";
 	int qscale = 10;
 
 	FILE *fp_in, *fp_out;
@@ -22,7 +22,7 @@ int main(int argc, char** argv)
 	}
 
 	fp_in = fopen(filename_in, "rb");
-	if (fp_in)
+	if (!fp_in)
 	{
 		printf("open input file fail, %s\n", filename_in);
 		return -1;
@@ -70,7 +70,7 @@ int main(int argc, char** argv)
 	}
 
 	fp_out = fopen(filename_out, "wb");
-	if (fp_out)
+	if (!fp_out)
 	{
 		printf("open output file fail, %s\n", filename_out);
 		free(buf_out);

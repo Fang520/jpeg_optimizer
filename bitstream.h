@@ -24,6 +24,7 @@ void put_sbits(PutBitContext *pb, int n, int32_t value);
 void put_bits32(PutBitContext *s, uint32_t value);
 
 void init_get_bits(GetBitContext *s, const uint8_t *buffer, int bit_size);
+int get_xbits(GetBitContext *s, int n);
 int get_bits(GetBitContext *s, int n);
 
 #endif

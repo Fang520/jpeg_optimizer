@@ -98,16 +98,28 @@ void init_get_bits(GetBitContext *s, const uint8_t *buffer, int bit_size)
 	s->index = 0;
 }
 
-int get_bits(GetBitContext *s, int n)
+int get_xbits(GetBitContext *s, int n)
 {
 	register int sign;
 	register int32_t cache;
-	unsigned int re_index = s->index;
+	unsigned int re_index = (s)->index;
 	int re_cache = 0;
 	re_cache = bswap32(*(uint32_t*)(((const uint8_t *)(s)->buffer) + (re_index >> 3))) << (re_index & 0x07);
-	cache = (uint32_t)re_cache;
+	cache = ((uint32_t)re_cache);
 	sign = (~cache) >> 31;
 	re_index += n;
 	s->index = re_index;
 	return ((((uint32_t)(sign ^ cache)) >> (32 - (n))) ^ sign) - sign;
+}
+
+int get_bits(GetBitContext *s, int n)
+{
+	register int tmp;
+	unsigned int re_index = s->index;
+	int re_cache = 0;
+	re_cache = bswap32(*(uint32_t*)(((const uint8_t *)(s)->buffer) + (re_index >> 3))) << (re_index & 0x07);
+	tmp = (((uint32_t)(re_cache)) >> (32 - (n)));
+	re_index += n;
+	s->index = re_index;
+	return tmp;
 }

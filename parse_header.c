@@ -164,7 +164,7 @@ int parse_header(jpeg_ctx_t *ctx, const uint8_t *data, int data_len)
 				ctx->ht_ac_index[n - 1] = m & 0x0f;
 			}
 			p += len + 2;
-			return 0;
+			return p - data;
 			break;
 
 		case M_SOF1:

@@ -74,6 +74,7 @@ int decode_dc(jpeg_ctx_t *ctx, int yuv_index, uint16_t mb[])
 	if (len)
 	{
 		val = get_xbits(&ctx->dec_bit_ctx, len);
+		printf("dc=%d ac=", val);
 		val = val * dqt[0] + ctx->last_dc[yuv_index];
 		ctx->last_dc[yuv_index] = val;
 		mb[0] = val;
@@ -81,6 +82,7 @@ int decode_dc(jpeg_ctx_t *ctx, int yuv_index, uint16_t mb[])
 	return 0;
 }
 
+#if 0
 int decode_ac(jpeg_ctx_t *ctx, int yuv_index, uint16_t mb[])
 {
 	int level;
@@ -100,7 +102,6 @@ int decode_ac(jpeg_ctx_t *ctx, int yuv_index, uint16_t mb[])
 	do
 	{
 		re_cache = bswap32(*(uint32_t*)(((const uint8_t *)gb->buffer) + (re_index >> 3))) << (re_index & 0x07);
-
 		int n, nb_bits;
 		unsigned int index;
 		index = (((uint32_t)(re_cache)) >> (32 - 9));
@@ -130,7 +131,7 @@ int decode_ac(jpeg_ctx_t *ctx, int yuv_index, uint16_t mb[])
 			int sign = (~cache) >> 31;
 			level = (((uint32_t)(sign ^ cache)) >> (32 - code)) ^ sign - sign;
 
-			printf("index=%d level=%d ", yuv_index, level);
+			printf("%d re_index=%d", level, re_index);
 
 			re_index += code;
 
@@ -141,6 +142,42 @@ int decode_ac(jpeg_ctx_t *ctx, int yuv_index, uint16_t mb[])
 			mb[i] = level * dqt[i];
 		} 
 	} while (i < 63);
+	printf("\n");
 	gb->index = re_index;
+	return 0;
+}
+#endif
+int decode_ac(jpeg_ctx_t *ctx, int yuv_index, uint16_t mb[])
+{
+	int level;
+	uint16_t code;
+	GetBitContext *gb;
+	gb = &ctx->dec_bit_ctx;
+	uint32_t re_index;
+	int re_cache;
+	int i;
+	uint8_t *dqt;
+	int ac_index = yuv_index ? 1 : 0;
+
+	dqt = ctx->dqt[ctx->qt_index[yuv_index]];
+
+	i = 0;
+	do
+	{
+		code = get_vlc(gb, ctx->dec_vlcs[1][ac_index].table, 9, 2);
+		i += code >> 4;
+		code &= 0xf;
+		if (code)
+		{
+			level = get_xbits(&ctx->dec_bit_ctx, code);
+			printf("%d(%d) ", level, i);
+			if (i > 63)
+			{
+				return -1;
+			}
+			mb[i] = level * dqt[i];
+		}
+	} while (i < 63);
+	printf("\n");
 	return 0;
 }

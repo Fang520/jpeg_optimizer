@@ -5,8 +5,8 @@
 
 int main(int argc, char** argv)
 {
-	uint8_t *filename_in = "d:\\mini.jpg";
-	uint8_t *filename_out = "d:\\mini_opt.jpg";
+	uint8_t *filename_in = "e:\\mini.jpg";
+	uint8_t *filename_out = "e:\\mini_opt.jpg";
 	int qscale = 10;
 
 	FILE *fp_in, *fp_out;

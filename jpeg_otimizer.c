@@ -54,7 +54,6 @@ static int process_mcu(jpeg_ctx_t *ctx)
 	{
 		for (j = 0; j < ctx->rate_h[i] * ctx->rate_v[i]; j++)
 		{
-			printf("---mb, index=%d\n", i);
 			ret = process_mb(ctx, i);
 			if (ret == 1)
 				return 0;
@@ -145,6 +144,7 @@ int optimize_jpeg(const uint8_t *input, int input_len, uint8_t *output, int *out
 	}
 
 	ret = process_body(ctx);
+	getchar();
 	if (ret != 0)
 	{
 		free_ctx(ctx);

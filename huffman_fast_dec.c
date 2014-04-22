@@ -45,7 +45,7 @@ static int build_table(VLC *vlc, int table_nb_bits, int nb_codes, VLCcode *codes
 	if (table_nb_bits > 30)
 		return -1;
 	table_index = alloc_table(vlc, table_size);
-	printf("new table index=%d size=%d\n", table_index, table_size);
+	//printf("new table index=%d size=%d\n", table_index, table_size);
 	if (table_index < 0)
 		return -1;
 	table = &vlc->table[table_index];
@@ -59,15 +59,15 @@ static int build_table(VLC *vlc, int table_nb_bits, int nb_codes, VLCcode *codes
 		n = codes[i].bits;
 		code = codes[i].code;
 		symbol = codes[i].symbol;
-		printf("i=%d n=%d code=0x%x\n", i, n, code);
+		//printf("i=%d n=%d code=0x%x\n", i, n, code);
 		if (n <= table_nb_bits) {
 			j = code >> (32 - table_nb_bits);
 			nb = 1 << (table_nb_bits - n);
 			inc = 1;
 			for (k = 0; k < nb; k++) {
-				printf("%4x: code=%d n=%d\n", j, i, n);
+				//printf("%4x: code=%d n=%d\n", j, i, n);
 				if (table[j][1] /*bits*/ != 0) {
-					printf("incorrect codes\n");
+					//printf("incorrect codes\n");
 					return -1;
 				}
 				table[j][1] = n; //bits
@@ -95,7 +95,7 @@ static int build_table(VLC *vlc, int table_nb_bits, int nb_codes, VLCcode *codes
 			subtable_bits = MIN(subtable_bits, table_nb_bits);
 			j = code_prefix;
 			table[j][1] = -subtable_bits;
-			printf("%4x: n=%d (subtable)\n", j, codes[i].bits + table_nb_bits);
+			//printf("%4x: n=%d (subtable)\n", j, codes[i].bits + table_nb_bits);
 			index = build_table(vlc, subtable_bits, k - i, codes + i);
 			if (index < 0)
 				return -1;

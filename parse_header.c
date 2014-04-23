@@ -210,34 +210,3 @@ int parse_header(jpeg_ctx_t *ctx, const uint8_t *data, int data_len)
 
 	return ERR_SOS_NOTFOUND;
 }
-
-#if 0
-
-#pragma warning(disable : 4996)
-
-uint8_t buf[1024 * 1024];
-jpeg_ctx_t ctx;
-int ret;
-FILE *fp;
-
-int main(int argc, char** argv)
-{
-	memset(&ctx, 0, sizeof(ctx));
-	if (argc > 1)
-		fp = fopen(argv[1], "rb");
-	else
-		fp = fopen("e:\\test.jpg", "rb");
-	if (fp)
-	{
-		int ret = fread(buf, 1, 1024 * 1024, fp);
-		fclose(fp);
-		printf("read %d bytes\n", ret);
-
-		ret = parse_header(&ctx, buf, 1024 * 1024);
-		printf("parse value %d\n", ret);
-	}
-
-	return 0;
-}
-
-#endif

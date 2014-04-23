@@ -57,9 +57,6 @@ int close_dec_bitstream(jpeg_ctx_t *ctx)
 int decode_dc(jpeg_ctx_t *ctx, int yuv_index, short mb[])
 {
 	int code, val;
-	//uint8_t *dqt;
-
-	//dqt = ctx->dqt[ctx->qt_index[yuv_index]];
 
 	code = get_vlc(&ctx->getbit_ctx, ctx->dec_vlcs[0][yuv_index ? 1 : 0].table);
 	if (code < 0)
@@ -68,8 +65,6 @@ int decode_dc(jpeg_ctx_t *ctx, int yuv_index, short mb[])
 	if (code)
 	{
 		val = get_xbits(&ctx->getbit_ctx, code);
-		//val = val * dqt[0] + ctx->last_dc[yuv_index];
-		//ctx->last_dc[yuv_index] = val;
 		mb[0] = val;
 	}
 
@@ -78,13 +73,11 @@ int decode_dc(jpeg_ctx_t *ctx, int yuv_index, short mb[])
 
 int decode_ac(jpeg_ctx_t *ctx, int yuv_index, short mb[])
 {
-	//uint8_t *dqt;
 	int zero_num, ac_index, code, len, val;
 
-	//dqt = ctx->dqt[ctx->qt_index[yuv_index]];
 	ac_index = yuv_index ? 1 : 0;
-
 	zero_num = 0;
+
 	do
 	{
 		code = get_vlc(&ctx->getbit_ctx, ctx->dec_vlcs[1][ac_index].table);
@@ -100,5 +93,6 @@ int decode_ac(jpeg_ctx_t *ctx, int yuv_index, short mb[])
 			mb[zero_num] = val;
 		}
 	} while (zero_num < 63);
+
 	return 0;
 }

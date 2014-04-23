@@ -4,11 +4,9 @@
 #include <stdint.h>
 #include "bitstream.h"
 
-#define VLC_TYPE int16_t
-
 typedef struct VLC {
 	int bits;
-	VLC_TYPE(*table)[2]; ///< code, bits
+	int16_t (*table)[2]; ///< code, bits
 	int table_size, table_allocated;
 } VLC;
 

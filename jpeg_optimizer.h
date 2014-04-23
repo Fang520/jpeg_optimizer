@@ -44,8 +44,8 @@ typedef struct {
 	uint8_t ht_ac_index[3];
 	int mcu_number;
 	uint8_t *in_buf, *in_pos, *out_buf, *out_pos;
-	PutBitContext enc_bit_ctx;
-	GetBitContext dec_bit_ctx;
+	PutBitContext putbit_ctx;
+	GetBitContext getbit_ctx;
 	VLC dec_vlcs[2][2];
 	int last_dc[3];
 } jpeg_ctx_t;

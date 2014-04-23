@@ -12,6 +12,31 @@
 #include "decode.h"
 #include "jpeg_optimizer.h"
 
+/*
+jpeg要点
+1 huffman解码很慢，传统的先建树在深度递归根本不能用，一定要用多级查表法，这个算法比较复杂
+2 码流里遇到ff要编码成ff00，这个在解码和编码时都要过滤一遍
+3 码流结束要字节边界对齐，要补1
+4 宏块如果后续全为0，用eob截断
+5 huffman编码其实只是编码数据的长度，码流是以不断重复的len+data这样的结构组织的，后面的数据不编码（但所有的资料上都写的超级复杂）
+6 jpeg支持分片（dri），一组mcu后，码流需要重新初始化，和h264的slice很像，解决错误传递的问题，没支持
+7 码流里数据的正负号用最高位表示，高位是1为正
+8 app1字段里存的是相机光圈这些信息（Exif），这个很常用，发现图片有这个字段时，需要保留
+9 huffman码表是用范式哈夫曼存储的，这个只用两个数组就能构建出tree，很巧妙
+10 jpeg还主要有无损压缩和渐进压缩两种算法，没支持
+
+优化的地方
+1 去掉idct, ict
+2 去掉zigzag scan
+3 去掉yuv转换（以前有的图片解码出来不是yuv420或411的，需要转成yuv420才能编码）
+4 仅支持baseline，不支持灰度jpg，不支持dri，大大简化算法，提高性能
+5 只使用一个量化表（一般都是2个，亮度色度各一个）
+6 编码使用标准的huffman码表，只需生成一次，多次使用（前提是一个进程要能优化多张图片，不能优化一张就关闭）
+7 如果原始图片用的是标准量化表，那么解码时将不生成解码表，极大节约时间（还没做完）
+8 使用了ffmpeg里的码流读写和huffman多级查表算法，速度是所用软件中最快的，超过libjpeg
+9 使用30级固定量化表
+*/
+
 static void free_ctx(jpeg_ctx_t *ctx)
 {
 	if (ctx->app1_data)
@@ -31,19 +56,19 @@ static void free_ctx(jpeg_ctx_t *ctx)
 
 static int re_quantize(jpeg_ctx_t *ctx, uint16_t mb[])
 {
-
 }
 
 /* 0=ok -1=err 1=end*/
 static int process_mb(jpeg_ctx_t *ctx, int yuv_index)
 {
-	uint16_t mb[64];
+	int i;
+	short mb[64];
 	memset(mb, 0, sizeof(mb));
-	if (decode_dc(ctx, yuv_index, mb) < 0) return -1;
-	if (decode_ac(ctx, yuv_index, mb) < 0) return -1;
-	//re_quantize(ctx, mb);
-	//encode_dc(ctx, yuv_index, mb);
-	//encode_dc(ctx, yuv_index, mb);
+	decode_dc(ctx, yuv_index, mb);
+	decode_ac(ctx, yuv_index, mb);
+	re_quantize(ctx, mb);
+	encode_dc(ctx, yuv_index, mb);
+	encode_ac(ctx, yuv_index, mb);
 }
 
 /* 0=ok -1=err 1=end*/
@@ -61,7 +86,8 @@ static int process_mcu(jpeg_ctx_t *ctx)
 				return -1;
 		}
 	}
-	return 0;
+	//return 0;
+	return 1;
 }
 
 static int process_body(jpeg_ctx_t *ctx)

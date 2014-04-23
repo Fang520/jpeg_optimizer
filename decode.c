@@ -1,10 +1,5 @@
 #include "decode.h"
 
-static uint32_t bswap32(uint32_t x)
-{
-	return ((((x) << 8 & 0xff00) | ((x) >> 8 & 0x00ff)) << 16 | ((((x) >> 16) << 8 & 0xff00) | (((x) >> 16) >> 8 & 0x00ff)));
-}
-
 int build_dec_vlc(jpeg_ctx_t *ctx)
 {
 	int ret;
@@ -51,7 +46,7 @@ int open_dec_bitstream(jpeg_ctx_t *ctx, const uint8_t *buf, int len)
 		}
 	}
 
-	init_get_bits(&ctx->dec_bit_ctx, ctx->in_buf, (dst - ctx->in_buf) * 8);
+	init_get_bits(&ctx->getbit_ctx, ctx->in_buf, (dst - ctx->in_buf) * 8);
 
 	return 0;
 }
@@ -61,123 +56,51 @@ int close_dec_bitstream(jpeg_ctx_t *ctx)
 	return 0;
 }
 
-int decode_dc(jpeg_ctx_t *ctx, int yuv_index, uint16_t mb[])
+int decode_dc(jpeg_ctx_t *ctx, int yuv_index, short mb[])
 {
-	int len, val;
-	uint8_t *dqt;
+	int code, val;
+	//uint8_t *dqt;
 
-	dqt = ctx->dqt[ctx->qt_index[yuv_index]];
+	//dqt = ctx->dqt[ctx->qt_index[yuv_index]];
 
-	len = get_vlc(&ctx->dec_bit_ctx, ctx->dec_vlcs[0][yuv_index ? 1 : 0].table, 9, 2);
-	if (len < 0)
+	code = get_vlc(&ctx->getbit_ctx, ctx->dec_vlcs[0][yuv_index ? 1 : 0].table);
+	if (code < 0)
 		return -1;
-	if (len)
+
+	if (code)
 	{
-		val = get_xbits(&ctx->dec_bit_ctx, len);
-		printf("dc=%d ac=", val);
-		val = val * dqt[0] + ctx->last_dc[yuv_index];
-		ctx->last_dc[yuv_index] = val;
+		val = get_xbits(&ctx->getbit_ctx, code);
+		//val = val * dqt[0] + ctx->last_dc[yuv_index];
+		//ctx->last_dc[yuv_index] = val;
 		mb[0] = val;
 	}
+
 	return 0;
 }
 
-#if 0
-int decode_ac(jpeg_ctx_t *ctx, int yuv_index, uint16_t mb[])
+int decode_ac(jpeg_ctx_t *ctx, int yuv_index, short mb[])
 {
-	int level;
-	uint16_t code;
-	GetBitContext *gb;
-	gb = &ctx->dec_bit_ctx;
-	uint32_t re_index; 
-	int re_cache;
-	int i;
-	uint8_t *dqt;
-	int ac_index = yuv_index ? 1 : 0;
+	//uint8_t *dqt;
+	int zero_num, ac_index, code, len, val;
 
-	dqt = ctx->dqt[ctx->qt_index[yuv_index]];
-	i = 0;
-	re_index = gb->index;
-	re_cache = 0;
+	//dqt = ctx->dqt[ctx->qt_index[yuv_index]];
+	ac_index = yuv_index ? 1 : 0;
+
+	zero_num = 0;
 	do
 	{
-		re_cache = bswap32(*(uint32_t*)(((const uint8_t *)gb->buffer) + (re_index >> 3))) << (re_index & 0x07);
-		int n, nb_bits;
-		unsigned int index;
-		index = (((uint32_t)(re_cache)) >> (32 - 9));
-		code = ctx->dec_vlcs[1][ac_index].table[index][0];
-		n = ctx->dec_vlcs[1][ac_index].table[index][1];
-		if (n < 0)
+		code = get_vlc(&ctx->getbit_ctx, ctx->dec_vlcs[1][ac_index].table);
+		zero_num += code >> 4; //尼玛, 构造vlc时篡改符号值，每个符号加了16，原来就是了这里能够自动zero_num + 1啊，太扣效率了吧
+		len = code & 0xf;
+		if (len)
 		{
-			re_index += 9;
-			re_cache = bswap32(*(uint32_t*)(((const uint8_t *)gb->buffer) + (re_index >> 3))) << (re_index & 0x07);
-			nb_bits = -n;
-			index = ((uint32_t)(re_cache)) >> (32 - nb_bits) + code;
-			code = ctx->dec_vlcs[1][ac_index].table[index][0];
-			n = ctx->dec_vlcs[1][ac_index].table[index][1];
-		}
-		re_cache <<= n;
-		re_index += n;
-
-		i += code >> 4;
-		code &= 0xf;
-		if (code)
-		{
-			if (code > 25 - 16)
-			{
-				re_cache = bswap32(*(uint32_t*)(((const uint8_t *)gb->buffer) + (re_index >> 3))) << (re_index & 0x07);
-			}
-			int cache = (uint32_t)re_cache;
-			int sign = (~cache) >> 31;
-			level = (((uint32_t)(sign ^ cache)) >> (32 - code)) ^ sign - sign;
-
-			printf("%d re_index=%d", level, re_index);
-
-			re_index += code;
-
-			if (i > 63)
+			val = get_xbits(&ctx->getbit_ctx, len);
+			if (zero_num > 63)
 			{
 				return -1;
 			}
-			mb[i] = level * dqt[i];
-		} 
-	} while (i < 63);
-	printf("\n");
-	gb->index = re_index;
-	return 0;
-}
-#endif
-int decode_ac(jpeg_ctx_t *ctx, int yuv_index, uint16_t mb[])
-{
-	int level;
-	uint16_t code;
-	GetBitContext *gb;
-	gb = &ctx->dec_bit_ctx;
-	uint32_t re_index;
-	int re_cache;
-	int i;
-	uint8_t *dqt;
-	int ac_index = yuv_index ? 1 : 0;
-
-	dqt = ctx->dqt[ctx->qt_index[yuv_index]];
-
-	i = 0;
-	do
-	{
-		code = get_vlc(gb, ctx->dec_vlcs[1][ac_index].table, 9, 2);
-		i += code >> 4;
-		code &= 0xf;
-		if (code)
-		{
-			level = get_xbits(&ctx->dec_bit_ctx, code);
-			printf("%d(%d) ", level, i);
-			if (i > 63)
-			{
-				return -1;
-			}
-			mb[i] = level * dqt[i];
+			mb[zero_num] = val;
 		}
-	} while (i < 63);
-	printf("\n");
+	} while (zero_num < 63);
 	return 0;
 }

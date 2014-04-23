@@ -176,12 +176,12 @@ int build_vlc(VLC *vlc, const uint8_t *bits_table, const uint8_t *val_table, int
 		huff_sym[i] = i + 16 * is_ac;
 
 	if (is_ac)
-		huff_sym[0] = 16 * 256;
+		huff_sym[0] = 16 * 256; // ffmpeg效率太高了，居然篡改EOB的值, 是为了后面解码时减少一次if(eob) break的判断
 
 	return ff_init_vlc_sparse(vlc, 9, nb_codes, huff_size, huff_code, huff_sym);
 }
 
-int get_vlc(GetBitContext *s, int16_t(*table)[2], int bits, int max_depth)
+int get_vlc(GetBitContext *s, int16_t(*table)[2])
 {
 	int code;
 
@@ -191,26 +191,17 @@ int get_vlc(GetBitContext *s, int16_t(*table)[2], int bits, int max_depth)
 
 	int n, nb_bits;
 	unsigned int index;
-	index = (((uint32_t)(re_cache)) >> (32 - bits));
+	index = (((uint32_t)(re_cache)) >> (32 - 9));
 	code = table[index][0];
 	n = table[index][1];
-	if (max_depth > 1 && n < 0)
+	if (n < 0)
 	{
-		re_index += bits;
+		re_index += 9;
 		re_cache = bswap32(*(uint32_t*)(((const uint8_t *)(s)->buffer) + (re_index >> 3))) << (re_index & 0x07);
 		nb_bits = -n;
 		index = (((uint32_t)re_cache) >> (32 - nb_bits)) + code;
 		code = table[index][0];
 		n = table[index][1];
-		if (max_depth > 2 && n < 0)
-		{
-			re_index += nb_bits;
-			re_cache = bswap32(*(uint32_t*)(((const uint8_t *)(s)->buffer) + (re_index >> 3))) << (re_index & 0x07);
-			nb_bits = -n;
-			index = (((uint32_t)re_cache) >> (32 - nb_bits)) + code;
-			code = table[index][0];
-			n = table[index][1];
-		}
 	}
 	re_cache <<= n;
 	re_index += n;

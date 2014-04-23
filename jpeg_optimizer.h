@@ -30,7 +30,6 @@ typedef struct {
 	int app1_len;
 	int height;
 	int width;
-	int dri;
 	int qscale;
 	dht_dc_t dht_dc[2]; 
 	dht_ac_t dht_ac[2];
@@ -42,7 +41,6 @@ typedef struct {
 	uint8_t qt_index[3];
 	uint8_t ht_dc_index[3];
 	uint8_t ht_ac_index[3];
-	int mcu_number;
 	uint8_t *in_buf, *in_pos, *out_buf, *out_pos;
 	PutBitContext putbit_ctx;
 	GetBitContext getbit_ctx;

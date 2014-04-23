@@ -69,6 +69,7 @@ static int process_mb(jpeg_ctx_t *ctx, int yuv_index)
 	re_quantize(ctx, mb);
 	encode_dc(ctx, yuv_index, mb);
 	encode_ac(ctx, yuv_index, mb);
+	return 0;
 }
 
 /* 0=ok -1=err 1=end*/
@@ -86,29 +87,32 @@ static int process_mcu(jpeg_ctx_t *ctx)
 				return -1;
 		}
 	}
-	//return 0;
-	return 1;
+	return 0;
 }
 
 static int process_body(jpeg_ctx_t *ctx)
 {
-	int ret;
-	for (;;)
+	int i, ret;
+	int mb_width, mb_height, max_rate_h, max_rate_v;
+
+	max_rate_h = 0;
+	max_rate_v = 0;
+	for (i = 0; i < 3; i++)
+	{
+		if (ctx->rate_h[i] > max_rate_h)
+			max_rate_h = ctx->rate_h[i];
+		if (ctx->rate_v[i] > max_rate_v)
+			max_rate_v = ctx->rate_v[i];
+	}
+	mb_width = (ctx->width + max_rate_h * 8 - 1) / (max_rate_h * 8);
+	mb_height = (ctx->height + max_rate_v * 8 - 1) / (max_rate_v * 8);
+	for (i = 0; i < mb_width * mb_height; i++)
 	{
 		ret = process_mcu(ctx);
 		if (ret == 1)
 			break;
 		else if (ret == -1)
 			return -1;
-
-		ctx->mcu_number++;
-		if (ctx->dri)
-		{
-			if (ctx->mcu_number % ctx->dri == 0)
-			{
-				ctx->in_pos += 2;
-			}
-		}
 	}
 	return 0;
 }
@@ -170,7 +174,6 @@ int optimize_jpeg(const uint8_t *input, int input_len, uint8_t *output, int *out
 	}
 
 	ret = process_body(ctx);
-	getchar();
 	if (ret != 0)
 	{
 		free_ctx(ctx);

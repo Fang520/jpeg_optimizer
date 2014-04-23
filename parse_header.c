@@ -146,9 +146,7 @@ int parse_header(jpeg_ctx_t *ctx, const uint8_t *data, int data_len)
 			break;
 
 		case M_DRI:
-			len = MAKEWORD(p[3], p[2]);
-			ctx->dri = MAKEWORD(p[5], p[4]);
-			p += len + 2;
+			return ERR_DRI_NOTSUPPORT;
 			break;
 
 		case M_SOS:

@@ -39,8 +39,6 @@ int open_dec_bitstream(jpeg_ctx_t *ctx, const uint8_t *buf, int len)
 				x = *src++;
 			if (x == 0)
 				continue;
-			else if (x >= 0xd0 && x <= 0xd7)
-				dst--;
 			else
 				break;
 		}

@@ -48,6 +48,9 @@
     <ClCompile Include="encode.c">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="re_quantize.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="parse_header.h">
@@ -78,6 +81,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="encode.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="re_quantize.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

@@ -1,15 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <memory.h>
 #include "parse_header.h"
 #include "build_opt_header.h"
-#include "canonical_huffman.h"
-#include "huffman_fast_dec.h"
-#include "std_huffman_table.h"
-#include "std_quant_table.h"
-#include "bitstream.h"
 #include "encode.h"
 #include "decode.h"
+#include "re_quantize.h"
 #include "jpeg_optimizer.h"
 
 /*
@@ -54,19 +51,14 @@ static void free_ctx(jpeg_ctx_t *ctx)
 	free(ctx);
 }
 
-static int re_quantize(jpeg_ctx_t *ctx, uint16_t mb[])
-{
-}
-
 /* 0=ok -1=err 1=end*/
 static int process_mb(jpeg_ctx_t *ctx, int yuv_index)
 {
-	int i;
 	short mb[64];
 	memset(mb, 0, sizeof(mb));
 	decode_dc(ctx, yuv_index, mb);
 	decode_ac(ctx, yuv_index, mb);
-	re_quantize(ctx, mb);
+	re_quantize(ctx, yuv_index, mb);
 	encode_dc(ctx, yuv_index, mb);
 	encode_ac(ctx, yuv_index, mb);
 	return 0;

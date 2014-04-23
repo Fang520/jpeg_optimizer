@@ -46,6 +46,7 @@ typedef struct {
 	GetBitContext getbit_ctx;
 	VLC dec_vlcs[2][2];
 	int last_dc[3];
+	int new_last_dc[3];
 } jpeg_ctx_t;
 
 int optimize_jpeg(const uint8_t *input, int input_len, uint8_t *output, int *output_len, int qscale);

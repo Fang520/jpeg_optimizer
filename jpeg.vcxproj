@@ -75,6 +75,7 @@
     <ClCompile Include="parse_header.c">
       <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableAllWarnings</WarningLevel>
     </ClCompile>
+    <ClCompile Include="re_quantize.c" />
     <ClCompile Include="std_huffman_table.c" />
     <ClCompile Include="std_quant_table.c" />
   </ItemGroup>
@@ -87,6 +88,7 @@
     <ClInclude Include="huffman_fast_dec.h" />
     <ClInclude Include="jpeg_optimizer.h" />
     <ClInclude Include="parse_header.h" />
+    <ClInclude Include="re_quantize.h" />
     <ClInclude Include="std_huffman_table.h" />
     <ClInclude Include="std_quant_table.h" />
   </ItemGroup>

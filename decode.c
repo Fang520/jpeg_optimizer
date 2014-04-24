@@ -1,4 +1,4 @@
-#include "decode.h"
+ï»¿#include "decode.h"
 
 int build_dec_vlc(jpeg_ctx_t *ctx)
 {
@@ -78,21 +78,20 @@ int decode_ac(jpeg_ctx_t *ctx, int yuv_index, short mb[])
 	ac_index = yuv_index ? 1 : 0;
 	zero_num = 0;
 
-	do
+	while (zero_num < 63)
 	{
 		code = get_vlc(&ctx->getbit_ctx, ctx->dec_vlcs[1][ac_index].table);
-		zero_num += code >> 4; //ÄáÂê, ¹¹ÔìvlcÊ±´Û¸Ä·ûºÅÖµ£¬Ã¿¸ö·ûºÅ¼ÓÁË16£¬Ô­À´¾ÍÊÇÁËÕâÀïÄÜ¹»×Ô¶¯zero_num + 1°¡£¬Ì«¿ÛĞ§ÂÊÁË°É
+		if (code < 0)
+			return -1;
+
+		zero_num += code >> 4; //å°¼ç›, æ„é€ vlcæ—¶ç¯¡æ”¹ç¬¦å·å€¼ï¼Œæ¯ä¸ªç¬¦å·åŠ äº†16ï¼ŒåŸæ¥å°±æ˜¯äº†è¿™é‡Œèƒ½å¤Ÿè‡ªåŠ¨zero_num + 1å•Šï¼Œå¤ªæ‰£æ•ˆç‡äº†å§
 		len = code & 0xf;
 		if (len)
 		{
 			val = get_xbits(&ctx->getbit_ctx, len);
-			if (zero_num > 63)
-			{
-				return -1;
-			}
 			mb[zero_num] = val;
 		}
-	} while (zero_num < 63);
+	}
 
 	return 0;
 }

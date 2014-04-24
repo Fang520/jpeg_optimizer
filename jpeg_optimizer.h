@@ -47,6 +47,7 @@ typedef struct {
 	VLC dec_vlcs[2][2];
 	int last_dc[3];
 	int new_last_dc[3];
+	int zero_num;
 } jpeg_ctx_t;
 
 int optimize_jpeg(const uint8_t *input, int input_len, uint8_t *output, int *output_len, int qscale);

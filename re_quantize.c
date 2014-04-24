@@ -17,13 +17,18 @@ int re_quantize(jpeg_ctx_t *ctx, int yuv_index, short mb[])
 	mb[0] = new_dc - ctx->new_last_dc[yuv_index];
 	ctx->new_last_dc[yuv_index] = new_dc;
 
-	for (i = 1; i < 64; i++)
+	ctx->zero_num = 0;
+	for (i = 63; i >= 1; i--)
 	{
 		ac = mb[i] * dqt[i];
 		if (ac)
 		{
 			new_ac = round((float)ac / (float)new_dqt[i]);
 			mb[i] = new_ac;
+			if (new_ac && !ctx->zero_num)
+			{
+				ctx->zero_num = i;
+			}
 		}
 	}
 	return 0;

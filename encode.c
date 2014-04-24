@@ -87,19 +87,6 @@ int encode_dc(jpeg_ctx_t *ctx, int yuv_index, short mb[])
 	return 0;
 }
 
-int tmp_calc_mb_last_index(short mb[])
-{
-	int i;
-	for (i = 63; i >= 0; i--)
-	{
-		if (mb[i])
-		{
-			return i;
-		}
-	}
-	return 0;
-}
-
 int encode_ac(jpeg_ctx_t *ctx, int yuv_index, short mb[])
 {
 	int mant, nbits, i, run, last_index, code;
@@ -113,7 +100,7 @@ int encode_ac(jpeg_ctx_t *ctx, int yuv_index, short mb[])
 	huff_code = ctx->dht_ac_hash[yuv_index ? 1 : 0].code;
 
 	run = 0;
-	last_index = tmp_calc_mb_last_index(mb);
+	last_index = ctx->zero_num;
 	for (i = 1; i <= last_index; i++)
 	{
 		val = mb[i];

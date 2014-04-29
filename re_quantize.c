@@ -1,6 +1,7 @@
-#include <math.h>
 #include "std_quant_table.h"
 #include "re_quantize.h"
+
+#define ROUNDED_DIV(a,b) (((a)>0 ? (a) + ((b)>>1) : (a) - ((b)>>1))/(b))
 
 int re_quantize(jpeg_ctx_t *ctx, int yuv_index, short mb[])
 {
@@ -13,7 +14,7 @@ int re_quantize(jpeg_ctx_t *ctx, int yuv_index, short mb[])
 	dc = mb[0] * dqt[0] + ctx->last_dc[yuv_index];
 	ctx->last_dc[yuv_index] = dc;
 
-	new_dc = round((float)dc / (float)new_dqt[0]);
+	new_dc = ROUNDED_DIV(dc , new_dqt[0]);
 	mb[0] = new_dc - ctx->new_last_dc[yuv_index];
 	ctx->new_last_dc[yuv_index] = new_dc;
 
@@ -23,7 +24,7 @@ int re_quantize(jpeg_ctx_t *ctx, int yuv_index, short mb[])
 		ac = mb[i] * dqt[i];
 		if (ac)
 		{
-			new_ac = round((float)ac / (float)new_dqt[i]);
+			new_ac = ROUNDED_DIV(ac, new_dqt[i]);
 			mb[i] = new_ac;
 			if (new_ac && !ctx->zero_num)
 			{

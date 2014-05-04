@@ -204,3 +204,4 @@ int get_vlc(GetBitContext *s, int16_t(*table)[2])
 	s->index = re_index;
 	return code;
 }
+

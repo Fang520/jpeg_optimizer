@@ -1,4 +1,4 @@
-ï»¿#include <stdlib.h>
+#include <stdlib.h>
 #include "decode.h"
 
 int build_dec_vlc(jpeg_ctx_t *ctx)
@@ -88,7 +88,7 @@ int decode_ac(jpeg_ctx_t *ctx, int yuv_index, short mb[])
 		if (code < 0)
 			return -1;
 
-		zero_num += code >> 4; //å°¼ç›, æ„é€ vlcæ—¶ç¯¡æ”¹ç¬¦å·å€¼ï¼Œæ¯ä¸ªç¬¦å·åŠ äº†16ï¼ŒåŸæ¥å°±æ˜¯äº†è¿™é‡Œèƒ½å¤Ÿè‡ªåŠ¨zero_num + 1å•Šï¼Œå¤ªæ‰£æ•ˆç‡äº†å§
+		zero_num += code >> 4; //ÄáÂê, ¹¹ÔìvlcÊ±´Û¸Ä·ûºÅÖµ£¬Ã¿¸ö·ûºÅ¼ÓÁË16£¬Ô­À´¾ÍÊÇÁËÕâÀïÄÜ¹»×Ô¶¯zero_num + 1°¡£¬Ì«¿ÛĞ§ÂÊÁË°É
 		len = code & 0xf;
 		if (len)
 		{
@@ -99,3 +99,4 @@ int decode_ac(jpeg_ctx_t *ctx, int yuv_index, short mb[])
 
 	return 0;
 }
+

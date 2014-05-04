@@ -197,3 +197,4 @@ int close_enc_bitstream(jpeg_ctx_t *ctx)
 	ctx->out_pos = ctx->out_buf + (len + 2);
 	return 0;
 }
+

@@ -34,3 +34,4 @@ int re_quantize(jpeg_ctx_t *ctx, int yuv_index, short mb[])
 	}
 	return 0;
 }
+

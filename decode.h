@@ -10,3 +10,4 @@ int decode_dc(jpeg_ctx_t *ctx, int yuv_index, short mb[]);
 int decode_ac(jpeg_ctx_t *ctx, int yuv_index, short mb[]);
 
 #endif
+

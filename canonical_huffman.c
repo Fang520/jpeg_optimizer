@@ -17,3 +17,4 @@ void make_canonical_huffman_codes(uint8_t *huff_size, uint16_t *huff_code, const
 		code <<= 1;
 	}
 }
+

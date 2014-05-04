@@ -210,3 +210,4 @@ int parse_header(jpeg_ctx_t *ctx, const uint8_t *data, int data_len)
 
 	return ERR_SOS_NOTFOUND;
 }
+

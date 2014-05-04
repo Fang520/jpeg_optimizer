@@ -54,3 +54,4 @@ typedef struct {
 int optimize_jpeg(const uint8_t *input, int input_len, uint8_t *output, int *output_len, int qscale);
 
 #endif
+

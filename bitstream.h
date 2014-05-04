@@ -28,3 +28,4 @@ int get_xbits(GetBitContext *s, int n);
 int get_bits(GetBitContext *s, int n);
 
 #endif
+

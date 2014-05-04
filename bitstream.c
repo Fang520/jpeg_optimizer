@@ -122,3 +122,4 @@ int get_bits(GetBitContext *s, int n)
 	s->index = re_index;
 	return tmp;
 }
+

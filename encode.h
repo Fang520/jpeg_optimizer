@@ -10,3 +10,4 @@ int encode_dc(jpeg_ctx_t *ctx, int yuv_index, short mb[]);
 int encode_ac(jpeg_ctx_t *ctx, int yuv_index, short mb[]);
 
 #endif
+

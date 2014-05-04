@@ -41,6 +41,7 @@ typedef struct {
 	uint8_t qt_index[3];
 	uint8_t ht_dc_index[3];
 	uint8_t ht_ac_index[3];
+	uint8_t nop;
 	uint8_t *in_buf, *in_pos, *out_buf, *out_pos;
 	PutBitContext putbit_ctx;
 	GetBitContext getbit_ctx;

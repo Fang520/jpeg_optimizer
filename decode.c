@@ -1,4 +1,5 @@
-﻿#include "decode.h"
+﻿#include <stdlib.h>
+#include "decode.h"
 
 int build_dec_vlc(jpeg_ctx_t *ctx)
 {
@@ -20,7 +21,9 @@ int build_dec_vlc(jpeg_ctx_t *ctx)
 
 int open_dec_bitstream(jpeg_ctx_t *ctx, const uint8_t *buf, int len)
 {
-	uint8_t *src, *dst, *x;
+	const uint8_t *src;
+	uint8_t *dst;
+	uint8_t x;
 
 	ctx->in_buf = (uint8_t*)malloc(len);
 	if (!ctx->in_buf)
@@ -51,6 +54,7 @@ int open_dec_bitstream(jpeg_ctx_t *ctx, const uint8_t *buf, int len)
 
 int close_dec_bitstream(jpeg_ctx_t *ctx)
 {
+	(void)(ctx);
 	return 0;
 }
 
@@ -65,7 +69,7 @@ int decode_dc(jpeg_ctx_t *ctx, int yuv_index, short mb[])
 	if (code)
 	{
 		val = get_xbits(&ctx->getbit_ctx, code);
-		mb[0] = val;
+		mb[0] = (short)val;
 	}
 
 	return 0;
@@ -89,7 +93,7 @@ int decode_ac(jpeg_ctx_t *ctx, int yuv_index, short mb[])
 		if (len)
 		{
 			val = get_xbits(&ctx->getbit_ctx, len);
-			mb[zero_num] = val;
+			mb[zero_num] = (short)val;
 		}
 	}
 

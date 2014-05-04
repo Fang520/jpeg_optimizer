@@ -1,12 +1,15 @@
-#include <stdio.h>
-#include "jpeg_optimizer.h"
+#ifdef _WIN32
+#define _CRT_SECURE_NO_DEPRECATE
+#endif
 
-#pragma warning(disable : 4996)
+#include <stdio.h>
+#include <stdlib.h>
+#include "jpeg_optimizer.h"
 
 int main(int argc, char** argv)
 {
-	uint8_t *filename_in = "d:\\mini.jpg";
-	uint8_t *filename_out = "d:\\mini_opt.jpg";
+	char *filename_in = "13M.jpg";
+	char *filename_out = "13M_opt.jpg";
 	int qscale = 10;
 
 	FILE *fp_in, *fp_out;
@@ -50,7 +53,7 @@ int main(int argc, char** argv)
 		return -1;
 	}
 
-	if (fread(buf_in, 1, len_in, fp_in) != len_in)
+	if (fread(buf_in, 1, len_in, fp_in) != (size_t)len_in)
 	{
 		printf("read input file fail\n");
 		free(buf_out);
@@ -79,7 +82,7 @@ int main(int argc, char** argv)
 		return -1;
 	}
 
-	if (fwrite(buf_out, 1, len_out, fp_out) != len_out)
+	if (fwrite(buf_out, 1, len_out, fp_out) != (size_t)len_out)
 	{
 		printf("write output file fail\n");
 		fclose(fp_out);

@@ -187,7 +187,6 @@ int close_enc_bitstream(jpeg_ctx_t *ctx)
 {
 	int len;
 	PutBitContext *pb;
-	char tailer[] = { 0xff, 0xd9 };
 
 	pb = &ctx->putbit_ctx;
 	byte_stuffing(pb);

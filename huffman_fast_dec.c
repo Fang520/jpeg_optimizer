@@ -10,6 +10,7 @@
 #define MIN(a,b) ((a) > (b) ? (b) : (a))
 
 typedef struct {
+	uint8_t nop;
 	uint8_t bits;
 	uint16_t symbol;
 	uint32_t code;
@@ -66,8 +67,8 @@ static int build_table(VLC *vlc, int table_nb_bits, int nb_codes, VLCcode *codes
 				if (table[j][1] /*bits*/ != 0) {
 					return -1;
 				}
-				table[j][1] = n; //bits
-				table[j][0] = symbol;
+				table[j][1] = (int16_t)n; //bits
+				table[j][0] = (int16_t)symbol;
 				j += inc;
 			}
 		}
@@ -75,28 +76,28 @@ static int build_table(VLC *vlc, int table_nb_bits, int nb_codes, VLCcode *codes
 			n -= table_nb_bits;
 			code_prefix = code >> (32 - table_nb_bits);
 			subtable_bits = n;
-			codes[i].bits = n;
+			codes[i].bits = (uint8_t)n;
 			codes[i].code = code << table_nb_bits;
 			for (k = i + 1; k < nb_codes; k++) {
 				n = codes[k].bits - table_nb_bits;
 				if (n <= 0)
 					break;
 				code = codes[k].code;
-				if (code >> (32 - table_nb_bits) != code_prefix)
+				if (code >> (32 - table_nb_bits) != (uint32_t)code_prefix)
 					break;
-				codes[k].bits = n;
+				codes[k].bits = (uint8_t)n;
 				codes[k].code = code << table_nb_bits;
 				subtable_bits = MAX(subtable_bits, n);
 			}
 			subtable_bits = MIN(subtable_bits, table_nb_bits);
 			j = code_prefix;
-			table[j][1] = -subtable_bits;
+			table[j][1] = (int16_t)-subtable_bits;
 			index = build_table(vlc, subtable_bits, k - i, codes + i);
 			if (index < 0)
 				return -1;
 			/* note: realloc has been done, so reload tables */
 			table = &vlc->table[table_index];
-			table[j][0] = index; //code
+			table[j][0] = (int16_t)index; //code
 			i = k - 1;
 		}
 	}
@@ -168,7 +169,7 @@ int build_vlc(VLC *vlc, const uint8_t *bits_table, const uint8_t *val_table, int
 	make_canonical_huffman_codes(huff_size, huff_code, bits_table, val_table);
 
 	for (i = 0; i < 256; i++)
-		huff_sym[i] = i + 16 * is_ac;
+		huff_sym[i] = (uint16_t)(i + 16 * is_ac);
 
 	if (is_ac)
 		huff_sym[0] = 16 * 256; // ffmpeg效率太高了，居然篡改EOB的值, 是为了后面解码时减少一次if(eob) break的判断

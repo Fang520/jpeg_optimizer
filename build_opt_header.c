@@ -48,7 +48,7 @@ int build_opt_header(jpeg_ctx_t *ctx, uint8_t output[], int output_len)
 	*p++ = 0xc4;
 	*p++ = 0;
 	*p++ = 0x1f;
-	*p++ = 0;
+	*p++ = 0; // id0 dc lum
 	memcpy(p, std_huffman_bits_dc_luminance, sizeof(std_huffman_bits_dc_luminance));
 	p += sizeof(std_huffman_bits_dc_luminance);
 	memcpy(p, std_huffman_val_dc, sizeof(std_huffman_val_dc));
@@ -57,18 +57,8 @@ int build_opt_header(jpeg_ctx_t *ctx, uint8_t output[], int output_len)
 	*p++ = 0xff;
 	*p++ = 0xc4;
 	*p++ = 0;
-	*p++ = 0xb5;
-	*p++ = 0x10;
-	memcpy(p, std_huffman_bits_ac_luminance, sizeof(std_huffman_bits_ac_luminance));
-	p += sizeof(std_huffman_bits_ac_luminance);
-	memcpy(p, std_huffman_val_ac_luminance, sizeof(std_huffman_val_ac_luminance));
-	p += sizeof(std_huffman_val_ac_luminance);
-
-	*p++ = 0xff;
-	*p++ = 0xc4;
-	*p++ = 0;
 	*p++ = 0x1f;
-	*p++ = 0x01;
+	*p++ = 0x01; // id 1 dc chr
 	memcpy(p, std_huffman_bits_dc_chrominance, sizeof(std_huffman_bits_dc_chrominance));
 	p += sizeof(std_huffman_bits_dc_chrominance);
 	memcpy(p, std_huffman_val_dc, sizeof(std_huffman_val_dc));
@@ -78,7 +68,17 @@ int build_opt_header(jpeg_ctx_t *ctx, uint8_t output[], int output_len)
 	*p++ = 0xc4;
 	*p++ = 0;
 	*p++ = 0xb5;
-	*p++ = 0x11;
+	*p++ = 0x10; // id 0 ac lum
+	memcpy(p, std_huffman_bits_ac_luminance, sizeof(std_huffman_bits_ac_luminance));
+	p += sizeof(std_huffman_bits_ac_luminance);
+	memcpy(p, std_huffman_val_ac_luminance, sizeof(std_huffman_val_ac_luminance));
+	p += sizeof(std_huffman_val_ac_luminance);
+
+	*p++ = 0xff;
+	*p++ = 0xc4;
+	*p++ = 0;
+	*p++ = 0xb5;
+	*p++ = 0x11; // id 1 ac chr
 	memcpy(p, std_huffman_bits_ac_chrominance, sizeof(std_huffman_bits_ac_chrominance));
 	p += sizeof(std_huffman_bits_ac_chrominance);
 	memcpy(p, std_huffman_val_ac_chrominance, sizeof(std_huffman_val_ac_chrominance));

@@ -9,9 +9,9 @@
 
 int main(int argc, char** argv)
 {
-	char *filename_in = "13M.jpg";
-	char *filename_out = "13M_opt.jpg";
-	int qscale = 10;
+	char *filename_in = "d:\\6M.jpg";
+	char *filename_out = "d:\\6M_opt22.jpg";
+	int qscale = 8;
 
 	FILE *fp_in, *fp_out;
 	uint8_t *buf_in;

@@ -70,7 +70,7 @@
     <ClCompile Include="decode.c" />
     <ClCompile Include="encode.c" />
     <ClCompile Include="huffman_fast_dec.c" />
-    <ClCompile Include="jpeg_otimizer.c" />
+    <ClCompile Include="jpeg_optimizer.c" />
     <ClCompile Include="main.c" />
     <ClCompile Include="parse_header.c">
       <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableAllWarnings</WarningLevel>

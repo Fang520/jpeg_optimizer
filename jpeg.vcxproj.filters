@@ -30,9 +30,6 @@
     <ClCompile Include="build_opt_header.c">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="jpeg_otimizer.c">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="canonical_huffman.c">
       <Filter>源文件</Filter>
     </ClCompile>
@@ -49,6 +46,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="re_quantize.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="jpeg_optimizer.c">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

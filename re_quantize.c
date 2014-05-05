@@ -3,7 +3,7 @@
 
 #define ROUNDED_DIV(a,b) (((a)>0 ? (a) + ((b)>>1) : (a) - ((b)>>1))/(b))
 
-int re_quantize(jpeg_ctx_t *ctx, int yuv_index, short mb[])
+void re_quantize(jpeg_ctx_t *ctx, int yuv_index, short mb[])
 {
 	const uint8_t *dqt, *new_dqt;
 	int i, dc, new_dc, ac, new_ac;
@@ -32,6 +32,5 @@ int re_quantize(jpeg_ctx_t *ctx, int yuv_index, short mb[])
 			}
 		}
 	}
-	return 0;
 }
 

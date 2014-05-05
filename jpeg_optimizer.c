@@ -52,41 +52,46 @@ static void free_ctx(jpeg_ctx_t *ctx)
 	free(ctx);
 }
 
-/* 0=ok -1=err 1=end*/
 static int process_mb(jpeg_ctx_t *ctx, int yuv_index)
 {
 	short mb[64];
+
 	memset(mb, 0, sizeof(mb));
-	decode_dc(ctx, yuv_index, mb);
-	decode_ac(ctx, yuv_index, mb);
+
+	if (decode_dc(ctx, yuv_index, mb) != 0)
+		return -1;
+	if (decode_ac(ctx, yuv_index, mb) != 0)
+		return -1;
+
 	re_quantize(ctx, yuv_index, mb);
-	encode_dc(ctx, yuv_index, mb);
-	encode_ac(ctx, yuv_index, mb);
+
+	if (encode_dc(ctx, yuv_index, mb) != 0)
+		return -1;
+	if (encode_ac(ctx, yuv_index, mb) != 0)
+		return -1;
+
 	return 0;
 }
 
-/* 0=ok -1=err 1=end*/
 static int process_mcu(jpeg_ctx_t *ctx)
 {
-	int i, j, ret;
+	int i, j;
+
 	for (i = 0; i < 3; i++)
 	{
 		for (j = 0; j < ctx->rate_h[i] * ctx->rate_v[i]; j++)
 		{
-			ret = process_mb(ctx, i);
-			if (ret == 1)
-				return 0;
-			else if (ret == -1)
+			if (process_mb(ctx, i) != 0)
 				return -1;
 		}
 	}
+
 	return 0;
 }
 
 static int process_body(jpeg_ctx_t *ctx)
 {
-	int i, ret;
-	int mb_width, mb_height, max_rate_h, max_rate_v;
+	int i, mb_width, mb_height, max_rate_h, max_rate_v;
 
 	max_rate_h = 0;
 	max_rate_v = 0;
@@ -97,16 +102,15 @@ static int process_body(jpeg_ctx_t *ctx)
 		if (ctx->rate_v[i] > max_rate_v)
 			max_rate_v = ctx->rate_v[i];
 	}
+
 	mb_width = (ctx->width + max_rate_h * 8 - 1) / (max_rate_h * 8);
 	mb_height = (ctx->height + max_rate_v * 8 - 1) / (max_rate_v * 8);
 	for (i = 0; i < mb_width * mb_height; i++)
 	{
-		ret = process_mcu(ctx);
-		if (ret == 1)
-			break;
-		else if (ret == -1)
+		if (process_mcu(ctx) != 0)
 			return -1;
 	}
+
 	return 0;
 }
 
@@ -121,6 +125,7 @@ int optimize_jpeg(const uint8_t *input, int input_len, uint8_t *output, int *out
 	ctx = (jpeg_ctx_t *)malloc(sizeof(jpeg_ctx_t));
 	if (!ctx)
 		return -1;
+
 	memset(ctx, 0, sizeof(jpeg_ctx_t));
 	ctx->qscale = qscale;
 
@@ -132,21 +137,21 @@ int optimize_jpeg(const uint8_t *input, int input_len, uint8_t *output, int *out
 	}
 	
 	ret = open_dec_bitstream(ctx, input + ret, input_len - ret);
-	if (ret < 0)
+	if (ret != 0)
 	{
 		free_ctx(ctx);
 		return -1;
 	}
 
 	ret = build_opt_header(ctx, output, *output_len);
-	if (ret < 0)
+	if (ret <= 0)
 	{
 		free_ctx(ctx);
 		return -1;
 	}
 	
 	ret = open_enc_bitstream(ctx, output + ret, *output_len - ret);
-	if (ret < 0)
+	if (ret != 0)
 	{
 		free_ctx(ctx);
 		return -1;
@@ -189,6 +194,7 @@ int optimize_jpeg(const uint8_t *input, int input_len, uint8_t *output, int *out
 
 	*output_len = ctx->out_pos - output;
 	free_ctx(ctx);
+
 	return 0;
 }
 

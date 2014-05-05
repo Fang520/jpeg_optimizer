@@ -52,7 +52,7 @@ int build_enc_vlc(jpeg_ctx_t *ctx)
 	return 0;
 }
 
-int encode_dc(jpeg_ctx_t *ctx, int yuv_index, short mb[])
+void encode_dc(jpeg_ctx_t *ctx, int yuv_index, short mb[])
 {
 	int mant, nbits;
 	short val;
@@ -84,10 +84,9 @@ int encode_dc(jpeg_ctx_t *ctx, int yuv_index, short mb[])
 
 		put_sbits(pb, nbits, mant);
 	}
-	return 0;
 }
 
-int encode_ac(jpeg_ctx_t *ctx, int yuv_index, short mb[])
+void encode_ac(jpeg_ctx_t *ctx, int yuv_index, short mb[])
 {
 	int mant, nbits, i, run, last_index, code;
 	short val;
@@ -134,8 +133,6 @@ int encode_ac(jpeg_ctx_t *ctx, int yuv_index, short mb[])
 
 	if (last_index < 63 || run != 0)
 		put_bits(pb, huff_size[0], huff_code[0]);
-
-	return 0;
 }
 
 int open_enc_bitstream(jpeg_ctx_t *ctx, uint8_t *buf, int len)

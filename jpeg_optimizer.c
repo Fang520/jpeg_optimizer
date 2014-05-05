@@ -65,10 +65,8 @@ static int process_mb(jpeg_ctx_t *ctx, int yuv_index)
 
 	re_quantize(ctx, yuv_index, mb);
 
-	if (encode_dc(ctx, yuv_index, mb) != 0)
-		return -1;
-	if (encode_ac(ctx, yuv_index, mb) != 0)
-		return -1;
+	encode_dc(ctx, yuv_index, mb);
+	encode_ac(ctx, yuv_index, mb);
 
 	return 0;
 }
@@ -120,6 +118,9 @@ int optimize_jpeg(const uint8_t *input, int input_len, uint8_t *output, int *out
 	int ret;
 
 	if (qscale < 0 || qscale >= 30)
+		return -1;
+
+	if (*output_len < input_len)
 		return -1;
 
 	ctx = (jpeg_ctx_t *)malloc(sizeof(jpeg_ctx_t));

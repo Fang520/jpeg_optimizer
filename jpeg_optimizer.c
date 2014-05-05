@@ -172,6 +172,8 @@ int optimize_jpeg(const uint8_t *input, int input_len, uint8_t *output, int *out
 		return -1;
 	}
 
+	prepare_middle_quant_table(ctx);
+
 	ret = process_body(ctx);
 	if (ret != 0)
 	{

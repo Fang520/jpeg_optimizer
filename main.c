@@ -4,6 +4,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 #include "jpeg_optimizer.h"
 
 int main(int argc, char** argv)
@@ -16,6 +17,7 @@ int main(int argc, char** argv)
 	uint8_t *buf_in;
 	uint8_t *buf_out;
 	int ret, len_in, len_out;
+	clock_t begin_time, end_time;
 
 	if (argc >= 4)
 	{
@@ -62,6 +64,8 @@ int main(int argc, char** argv)
 		return -1;
 	}
 
+	begin_time = clock();
+
 	ret = optimize_jpeg(buf_in, len_in, buf_out, &len_out, qscale);
 	if (ret != 0)
 	{
@@ -71,6 +75,8 @@ int main(int argc, char** argv)
 		fclose(fp_in);
 		return -1;
 	}
+
+	end_time = clock();
 
 	fp_out = fopen(filename_out, "wb");
 	if (!fp_out)
@@ -97,6 +103,10 @@ int main(int argc, char** argv)
 	free(buf_out);
 	free(buf_in);
 	fclose(fp_in);
+
+	printf("time: %d\n", end_time - begin_time);
+	getchar();
+
 	return 0;
 }
 

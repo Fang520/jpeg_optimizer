@@ -121,6 +121,9 @@ static int ff_init_vlc_sparse(VLC *vlc, int nb_bits, int nb_codes, const uint8_t
 	vlc->table_size = 0;
 
 	buf = malloc((nb_codes + 1) * sizeof(VLCcode));
+	if (!buf)
+		return -1;
+
 	j = 0;
 	for (i = 0; i < nb_codes; i++)
 	{

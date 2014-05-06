@@ -15,6 +15,8 @@
 #define ERR_FORMAT				-9
 #define ERR_EOI					-10
 #define ERR_DRI_NOTSUPPORT		-11
+#define ERR_MALLOC				-12
+
 
 int parse_header(jpeg_ctx_t *ctx, const uint8_t *data, int data_len);
 

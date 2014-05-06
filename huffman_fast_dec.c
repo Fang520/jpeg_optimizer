@@ -16,11 +16,6 @@ typedef struct {
 	uint32_t code;
 } VLCcode;
 
-static uint32_t bswap32(uint32_t x)
-{
-	return ((((x) << 8 & 0xff00) | ((x) >> 8 & 0x00ff)) << 16 | ((((x) >> 16) << 8 & 0xff00) | (((x) >> 16) >> 8 & 0x00ff)));
-}
-
 static int alloc_table(VLC *vlc, int size)
 {
 	int index;
@@ -180,31 +175,4 @@ int build_vlc(VLC *vlc, const uint8_t *bits_table, const uint8_t *val_table, int
 	return ff_init_vlc_sparse(vlc, 9, nb_codes, huff_size, huff_code, huff_sym);
 }
 
-int get_vlc(GetBitContext *s, int16_t(*table)[2])
-{
-	int code;
-
-	unsigned int re_index = s->index;
-	int re_cache = 0;
-	re_cache = bswap32(*(uint32_t*)(((const uint8_t *)(s)->buffer) + (re_index >> 3))) << (re_index & 0x07);
-
-	int n, nb_bits;
-	unsigned int index;
-	index = (((uint32_t)(re_cache)) >> (32 - 9));
-	code = table[index][0];
-	n = table[index][1];
-	if (n < 0)
-	{
-		re_index += 9;
-		re_cache = bswap32(*(uint32_t*)(((const uint8_t *)(s)->buffer) + (re_index >> 3))) << (re_index & 0x07);
-		nb_bits = -n;
-		index = (((uint32_t)re_cache) >> (32 - nb_bits)) + code;
-		code = table[index][0];
-		n = table[index][1];
-	}
-	re_cache <<= n;
-	re_index += n;
-	s->index = re_index;
-	return code;
-}
 

@@ -28,5 +28,7 @@ int get_xbits(GetBitContext *s, int n);
 int get_bits(GetBitContext *s, int n);
 int get_bits_count(GetBitContext *s);
 
+int get_vlc(GetBitContext *s, int16_t(*table)[2]);
+
 #endif
 

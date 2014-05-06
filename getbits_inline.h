@@ -4,7 +4,7 @@
 #include "bitstream.h"
 
 #ifdef _WIN32
-#define INLINE __forceinline
+#define INLINE 
 #else
 #define INLINE inline
 #endif

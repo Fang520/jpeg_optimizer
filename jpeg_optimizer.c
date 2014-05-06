@@ -57,10 +57,12 @@ static int process_mb(jpeg_ctx_t *ctx, int yuv_index)
 
 	memset(mb, 0, sizeof(mb));
 
-	if (decode_dc(ctx, yuv_index, mb) != 0)
-		return -1;
-	if (decode_ac(ctx, yuv_index, mb) != 0)
-		return -1;
+	decode(ctx, yuv_index, mb);
+
+	//if (decode_dc(ctx, yuv_index, mb) != 0)
+	//		return -1;
+	//if (decode_ac(ctx, yuv_index, mb) != 0)
+	//	return -1;
 
 	re_quantize(ctx, yuv_index, mb);
 

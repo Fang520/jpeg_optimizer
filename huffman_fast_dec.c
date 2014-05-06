@@ -1,8 +1,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <stdint.h>
-#include <assert.h>
 #include "huffman_fast_dec.h"
 #include "canonical_huffman.h"
 
@@ -161,8 +159,6 @@ int build_vlc(VLC *vlc, const uint8_t *bits_table, const uint8_t *val_table, int
 	uint16_t huff_code[256];
 	uint16_t huff_sym[256];
 	int i;
-
-	assert(nb_codes <= 256);
 
 	make_canonical_huffman_codes(huff_size, huff_code, bits_table, val_table);
 

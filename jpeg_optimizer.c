@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdint.h>
 #include <memory.h>
 #include "parse_header.h"
 #include "build_opt_header.h"

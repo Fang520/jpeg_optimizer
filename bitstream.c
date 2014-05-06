@@ -1,4 +1,3 @@
-#include <assert.h>
 #include "bitstream.h"
 
 static uint32_t bswap32(uint32_t x)
@@ -45,8 +44,6 @@ void put_bits(PutBitContext *s, int n, unsigned int value)
 	unsigned int bit_buf;
 	int bit_left;
 
-	assert(n <= 31 && value < (1U << n));
-
 	bit_buf = s->bit_buf;
 	bit_left = s->bit_left;
 
@@ -70,8 +67,6 @@ void put_bits(PutBitContext *s, int n, unsigned int value)
 
 void put_sbits(PutBitContext *pb, int n, int32_t value)
 {
-	assert(n >= 0 && n <= 31);
-
 	put_bits(pb, n, value & ((1 << n) - 1));
 }
 

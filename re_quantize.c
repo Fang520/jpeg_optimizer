@@ -1,5 +1,5 @@
-#include "std_quant_table.h"
 #include "re_quantize.h"
+#include "std_quant_table.h"
 
 #define ROUNDED_DIV(a,b) (((a)>=0 ? (a) + ((b)>>1) : (a) - ((b)>>1))/(b))
 

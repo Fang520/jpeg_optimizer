@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <stdint.h>
 #include "build_opt_header.h"
 #include "std_huffman_table.h"
 #include "std_quant_table.h"

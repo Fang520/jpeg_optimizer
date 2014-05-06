@@ -1,7 +1,7 @@
 #ifndef DECODE_H
 #define DECODE_H
 
-#include "jpeg_optimizer.h"
+#include "context.h"
 
 int build_dec_vlc(jpeg_ctx_t *ctx);
 int open_dec_bitstream(jpeg_ctx_t *ctx, const uint8_t *buf, int len);

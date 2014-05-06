@@ -1,8 +1,7 @@
 #ifndef PARSE_HEADER_H
 #define PARSE_HEADER_H
 
-#include <stdint.h>
-#include "jpeg_optimizer.h"
+#include "context.h"
 
 #define ERR_SOI					-1
 #define ERR_APP0_IDENTIFIER		-2

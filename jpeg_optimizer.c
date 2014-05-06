@@ -47,8 +47,8 @@ static void free_ctx(jpeg_ctx_t *ctx)
 		free(ctx->dec_vlcs[1][0].table);
 	if (ctx->dec_vlcs[1][1].table)
 		free(ctx->dec_vlcs[1][1].table);
-	if (ctx->in_buf)
-		free(ctx->in_buf);
+	if (ctx->in_bits_buf)
+		free(ctx->in_bits_buf);
 	free(ctx);
 }
 
@@ -112,15 +112,15 @@ static int process_body(jpeg_ctx_t *ctx)
 	return 0;
 }
 
-int optimize_jpeg(const uint8_t *input, int input_len, uint8_t *output, int *output_len, int qscale)
+int optimize_jpeg(const uint8_t *input, int *input_len, uint8_t *output, int *output_len, int qscale)
 {
 	jpeg_ctx_t *ctx;
-	int ret;
+	int ret, out_head_len, in_head_len;
 
 	if (qscale < 0 || qscale >= 30)
 		return -1;
 
-	if (*output_len < input_len)
+	if (*output_len < *input_len)
 		return -1;
 
 	ctx = (jpeg_ctx_t *)malloc(sizeof(jpeg_ctx_t));
@@ -130,14 +130,15 @@ int optimize_jpeg(const uint8_t *input, int input_len, uint8_t *output, int *out
 	memset(ctx, 0, sizeof(jpeg_ctx_t));
 	ctx->qscale = qscale;
 
-	ret = parse_header(ctx, input, input_len);
+	ret = parse_header(ctx, input, *input_len);
 	if (ret <= 0)
 	{
 		free_ctx(ctx);
 		return -1;
 	}
 	
-	ret = open_dec_bitstream(ctx, input + ret, input_len - ret);
+	in_head_len = ret;
+	ret = open_dec_bitstream(ctx, input + ret, *input_len - ret);
 	if (ret != 0)
 	{
 		free_ctx(ctx);
@@ -151,6 +152,7 @@ int optimize_jpeg(const uint8_t *input, int input_len, uint8_t *output, int *out
 		return -1;
 	}
 	
+	out_head_len = ret;
 	ret = open_enc_bitstream(ctx, output + ret, *output_len - ret);
 	if (ret != 0)
 	{
@@ -195,7 +197,8 @@ int optimize_jpeg(const uint8_t *input, int input_len, uint8_t *output, int *out
 		return -1;
 	}
 
-	*output_len = ctx->out_pos - output;
+	*output_len = out_head_len + ctx->out_bits_len;
+	*input_len = in_head_len + ctx->in_bits_len;
 	free_ctx(ctx);
 
 	return 0;

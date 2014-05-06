@@ -123,3 +123,8 @@ int get_bits(GetBitContext *s, int n)
 	return tmp;
 }
 
+int get_bits_count(GetBitContext *s)
+{
+	return s->index;
+}
+

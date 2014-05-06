@@ -138,7 +138,7 @@ void encode_ac(jpeg_ctx_t *ctx, int yuv_index, short mb[])
 int open_enc_bitstream(jpeg_ctx_t *ctx, uint8_t *buf, int len)
 {
 	init_put_bits(&ctx->putbit_ctx, buf, len);
-	ctx->out_buf = buf;
+	ctx->out_bits_buf = buf;
 	return 0;
 }
 
@@ -189,9 +189,9 @@ int close_enc_bitstream(jpeg_ctx_t *ctx)
 	byte_stuffing(pb);
 	flush_put_bits(pb);
 	len = escape_FF(pb->buf, put_bits_count(pb) / 8);
-	ctx->out_buf[len] = 0xff;
-	ctx->out_buf[len + 1] = 0xd9;
-	ctx->out_pos = ctx->out_buf + (len + 2);
+	ctx->out_bits_buf[len] = 0xff;
+	ctx->out_bits_buf[len + 1] = 0xd9;
+	ctx->out_bits_len = len + 2;
 	return 0;
 }
 

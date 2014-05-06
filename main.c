@@ -9,14 +9,14 @@
 
 int main(int argc, char** argv)
 {
-	char *filename_in = "d:\\6M.jpg";
-	char *filename_out = "d:\\6M_opt22.jpg";
+	char *filename_in = "d:\\mini2.jpg";
+	char *filename_out = "d:\\mini2_opt.jpg";
 	int qscale = 8;
 
 	FILE *fp_in, *fp_out;
 	uint8_t *buf_in;
 	uint8_t *buf_out;
-	int ret, len_in, len_out;
+	int ret, len_in, len_out, len_in_act, len_out_act;
 	clock_t begin_time, end_time;
 
 	if (argc >= 4)
@@ -64,9 +64,12 @@ int main(int argc, char** argv)
 		return -1;
 	}
 
+	len_in_act = len_in;
+	len_out_act = len_out;
+
 	begin_time = clock();
 
-	ret = optimize_jpeg(buf_in, len_in, buf_out, &len_out, qscale);
+	ret = optimize_jpeg(buf_in, &len_in_act, buf_out, &len_out_act, qscale);
 	if (ret != 0)
 	{
 		printf("optimize jpeg fail\n");
@@ -88,7 +91,7 @@ int main(int argc, char** argv)
 		return -1;
 	}
 
-	if (fwrite(buf_out, 1, len_out, fp_out) != (size_t)len_out)
+	if (fwrite(buf_out, 1, len_out_act, fp_out) != (size_t)len_out_act)
 	{
 		printf("write output file fail\n");
 		fclose(fp_out);
@@ -104,7 +107,10 @@ int main(int argc, char** argv)
 	free(buf_in);
 	fclose(fp_in);
 
-	printf("time: %d\n", end_time - begin_time);
+	printf("time: %d, inbuf left: %d, outbuf left: %d\n", 
+		end_time - begin_time, 
+		len_in - len_in_act, 
+		len_out - len_out_act);
 	getchar();
 
 	return 0;

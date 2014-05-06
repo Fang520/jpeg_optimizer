@@ -43,7 +43,8 @@ typedef struct {
 	uint8_t ht_dc_index[3];
 	uint8_t ht_ac_index[3];
 	uint8_t nop;
-	uint8_t *in_buf, *in_pos, *out_buf, *out_pos;
+	uint8_t *in_bits_buf, *out_bits_buf;
+	int in_bits_len, out_bits_len;
 	PutBitContext putbit_ctx;
 	GetBitContext getbit_ctx;
 	VLC dec_vlcs[2][2];
@@ -52,7 +53,7 @@ typedef struct {
 	int zero_num;
 } jpeg_ctx_t;
 
-int optimize_jpeg(const uint8_t *input, int input_len, uint8_t *output, int *output_len, int qscale);
+int optimize_jpeg(const uint8_t *input, int *input_len, uint8_t *output, int *output_len, int qscale);
 
 #endif
 

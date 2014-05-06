@@ -33,9 +33,6 @@
     <ClCompile Include="canonical_huffman.c">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="bitstream.c">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="main.c">
       <Filter>源文件</Filter>
     </ClCompile>
@@ -87,6 +84,12 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="context.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="getbits_inline.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="putbits_inline.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

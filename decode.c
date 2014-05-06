@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include "decode.h"
+#include "getbits_inline.h"
 
 int build_dec_vlc(jpeg_ctx_t *ctx)
 {

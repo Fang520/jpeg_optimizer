@@ -1,6 +1,7 @@
 #include "encode.h"
 #include "canonical_huffman.h"
 #include "std_huffman_table.h"
+#include "putbits_inline.h"
 
 const uint8_t ff_log2_tab[256] = {
 	0, 0, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4,

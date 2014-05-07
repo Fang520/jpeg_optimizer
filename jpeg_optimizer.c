@@ -53,16 +53,31 @@ static void free_ctx(jpeg_ctx_t *ctx)
 
 static int process_mb(jpeg_ctx_t *ctx, int yuv_index)
 {
+#ifndef _WIN32
+	short __attribute__((aligned(16))) mb[64];
+
+	__asm__ volatile(
+			"xorps  %%xmm0, %%xmm0  \n"
+			"movaps %%xmm0,    (%0) \n"
+			"movaps %%xmm0,  16(%0) \n"
+			"movaps %%xmm0,  32(%0) \n"
+			"movaps %%xmm0,  48(%0) \n"
+			"movaps %%xmm0,  64(%0) \n"
+			"movaps %%xmm0,  80(%0) \n"
+			"movaps %%xmm0,  96(%0) \n"
+			"movaps %%xmm0, 112(%0) \n"
+			:: "r"(mb)
+			: "memory"
+			);
+#else
 	short mb[64];
+	memset(mb, 0, 128);
+#endif
 
-	memset(mb, 0, sizeof(mb));
-
-	decode(ctx, yuv_index, mb);
-
-	//if (decode_dc(ctx, yuv_index, mb) != 0)
-	//		return -1;
-	//if (decode_ac(ctx, yuv_index, mb) != 0)
-	//	return -1;
+	if (decode_dc(ctx, yuv_index, mb) != 0)
+		return -1;
+	if (decode_ac(ctx, yuv_index, mb) != 0)
+		return -1;
 
 	re_quantize(ctx, yuv_index, mb);
 

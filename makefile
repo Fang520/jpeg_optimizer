@@ -1,5 +1,5 @@
 CC	    :=gcc
-CFLAGS	:=-g -Wall
+CFLAGS	:=-O3 -Wall
 SRCS	:=*.c
 OBJS	:=$(patsubst %.c,%.o,$(wildcard $(SRCS)))
 LIBS	:=

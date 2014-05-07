@@ -3,6 +3,12 @@
 #include "std_huffman_table.h"
 #include "putbits_inline.h"
 
+#ifdef _WIN32
+#define INLINE __forceinline
+#else
+#define INLINE inline
+#endif
+
 const uint8_t ff_log2_tab[256] = {
 	0, 0, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4,
 	5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
@@ -14,7 +20,7 @@ const uint8_t ff_log2_tab[256] = {
 	7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7
 };
 
-static int av_log2_16bit_c(unsigned int v)
+static int INLINE av_log2_16bit_c(unsigned int v)
 {
 	int n = 0;
 	if (v & 0xff00) {
@@ -26,7 +32,7 @@ static int av_log2_16bit_c(unsigned int v)
 	return n;
 }
 
-static int av_log2_c(unsigned int v)
+static int INLINE av_log2_c(unsigned int v)
 {
 	int n = 0;
 	if (v & 0xffff0000)

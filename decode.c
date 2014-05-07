@@ -63,7 +63,7 @@ int close_dec_bitstream(jpeg_ctx_t *ctx)
 	return 0;
 }
 
-static int decode_dc(jpeg_ctx_t *ctx, int yuv_index, short mb[])
+int decode_dc(jpeg_ctx_t *ctx, int yuv_index, short mb[])
 {
 	int code, val;
 
@@ -80,7 +80,7 @@ static int decode_dc(jpeg_ctx_t *ctx, int yuv_index, short mb[])
 	return 0;
 }
 
-static int decode_ac(jpeg_ctx_t *ctx, int yuv_index, short mb[])
+int decode_ac(jpeg_ctx_t *ctx, int yuv_index, short mb[])
 {
 	int zero_num, ac_index, code, len, val;
 
@@ -102,15 +102,6 @@ static int decode_ac(jpeg_ctx_t *ctx, int yuv_index, short mb[])
 		}
 	}
 
-	return 0;
-}
-
-int decode(jpeg_ctx_t *ctx, int yuv_index, short mb[])
-{
-	if (decode_dc(ctx, yuv_index, mb) != 0)
-		return -1;
-	if (decode_ac(ctx, yuv_index, mb) != 0)
-		return -1;
 	return 0;
 }
 

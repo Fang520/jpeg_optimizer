@@ -9,14 +9,14 @@
 
 int main(int argc, char** argv)
 {
-	char *filename_in = "d:\\mini2.jpg";
-	char *filename_out = "d:\\mini2_opt.jpg";
-	int qscale = 8;
+	char *filename_in = "/root/eric/13m.jpg";
+	char *filename_out = "13m_opt.jpg";
+	int qscale = 10;
 
 	FILE *fp_in, *fp_out;
 	uint8_t *buf_in;
 	uint8_t *buf_out;
-	int ret, len_in, len_out, len_in_act, len_out_act;
+	int i, ret, len_in, len_out, len_in_act, len_out_act;
 	clock_t begin_time, end_time;
 
 	if (argc >= 4)
@@ -64,19 +64,23 @@ int main(int argc, char** argv)
 		return -1;
 	}
 
-	len_in_act = len_in;
-	len_out_act = len_out;
-
 	begin_time = clock();
 
-	ret = optimize_jpeg(buf_in, &len_in_act, buf_out, &len_out_act, qscale);
-	if (ret != 0)
-	{
-		printf("optimize jpeg fail\n");
-		free(buf_out);
-		free(buf_in);
-		fclose(fp_in);
-		return -1;
+	for (i = 0; i < 1; i++)
+	{	
+		len_in_act = len_in;
+		len_out_act = len_out;
+
+
+		ret = optimize_jpeg(buf_in, &len_in_act, buf_out, &len_out_act, qscale);
+		if (ret != 0)
+		{
+			printf("optimize jpeg fail\n");
+			free(buf_out);
+			free(buf_in);
+			fclose(fp_in);
+			return -1;
+		}
 	}
 
 	end_time = clock();
@@ -108,10 +112,9 @@ int main(int argc, char** argv)
 	fclose(fp_in);
 
 	printf("time: %d, inbuf left: %d, outbuf left: %d\n", 
-		end_time - begin_time, 
+		(int)(end_time - begin_time), 
 		len_in - len_in_act, 
 		len_out - len_out_act);
-	getchar();
 
 	return 0;
 }

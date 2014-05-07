@@ -82,14 +82,15 @@ int decode_dc(jpeg_ctx_t *ctx, int yuv_index, short mb[])
 
 int decode_ac(jpeg_ctx_t *ctx, int yuv_index, short mb[])
 {
-	int zero_num, ac_index, code, len, val;
-
-	ac_index = yuv_index ? 1 : 0;
-	zero_num = 0;
+	int code, len, val;
+	GetBitContext *gb = &ctx->getbit_ctx;
+	int ac_index = yuv_index ? 1 : 0;
+	int16_t (*table)[2] = ctx->dec_vlcs[1][ac_index].table;
+	int zero_num = 0;
 
 	while (zero_num < 63)
 	{
-		code = get_vlc(&ctx->getbit_ctx, ctx->dec_vlcs[1][ac_index].table);
+		code = get_vlc(gb, table);
 		if (code < 0)
 			return -1;
 
@@ -97,7 +98,7 @@ int decode_ac(jpeg_ctx_t *ctx, int yuv_index, short mb[])
 		len = code & 0xf;
 		if (len)
 		{
-			val = get_xbits(&ctx->getbit_ctx, len);
+			val = get_xbits(gb, len);
 			mb[zero_num] = (short)val;
 		}
 	}

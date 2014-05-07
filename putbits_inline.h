@@ -15,7 +15,7 @@ static uint32_t INLINE bswap32(uint32_t x)
 	__asm
 	{
 		mov eax, x
-			bswap eax
+		bswap eax
 	}
 #else
 	__asm__("bswap   %0" : "+r" (x));

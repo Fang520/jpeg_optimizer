@@ -11,8 +11,17 @@
 
 static uint32_t INLINE bswap32(uint32_t x)
 {
+#ifdef _WIN32
+	__asm
+	{
+		mov eax, x
+		bswap eax
+	}
+#else
 	__asm__("bswap   %0" : "+r" (x));
 	return x;
+#endif
+	//return ((((x) << 8 & 0xff00) | ((x) >> 8 & 0x00ff)) << 16 | ((((x) >> 16) << 8 & 0xff00) | (((x) >> 16) >> 8 & 0x00ff)));
 }
 
 static void INLINE init_get_bits(GetBitContext *s, const uint8_t *buffer, int bit_size)

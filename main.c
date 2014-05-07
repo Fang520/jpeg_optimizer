@@ -9,8 +9,8 @@
 
 int main(int argc, char** argv)
 {
-	char *filename_in = "/root/eric/13m.jpg";
-	char *filename_out = "13m_opt.jpg";
+	char *filename_in = "d:\\13M.jpg";
+	char *filename_out = "d:\\13M_opt.jpg";
 	int qscale = 10;
 
 	FILE *fp_in, *fp_out;
@@ -115,6 +115,10 @@ int main(int argc, char** argv)
 		(int)(end_time - begin_time), 
 		len_in - len_in_act, 
 		len_out - len_out_act);
+
+#ifdef _WIN32
+	getchar();
+#endif
 
 	return 0;
 }

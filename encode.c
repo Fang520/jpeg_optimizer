@@ -106,7 +106,7 @@ void encode_ac(jpeg_ctx_t *ctx, int yuv_index, short mb[])
 	huff_code = ctx->dht_ac_hash[yuv_index ? 1 : 0].code;
 
 	run = 0;
-	last_index = ctx->zero_num;
+	last_index = ctx->zero_index;
 	for (i = 1; i <= last_index; i++)
 	{
 		val = mb[i];

@@ -27,7 +27,9 @@ typedef struct {
 
 typedef struct {
 	uint8_t *app1_data;
+	uint8_t *app1_xmp_data;
 	int app1_len;
+	int app1_xmp_len;
 	int height;
 	int width;
 	int qscale;

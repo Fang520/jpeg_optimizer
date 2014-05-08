@@ -38,6 +38,8 @@ static void free_ctx(jpeg_ctx_t *ctx)
 {
 	if (ctx->app1_data)
 		free(ctx->app1_data);
+	if (ctx->app1_xmp_data)
+		free(ctx->app1_xmp_data);
 	if (ctx->dec_vlcs[0][0].table)
 		free(ctx->dec_vlcs[0][0].table);
 	if (ctx->dec_vlcs[0][1].table)

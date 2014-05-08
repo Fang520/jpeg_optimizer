@@ -70,11 +70,22 @@ int parse_header(jpeg_ctx_t *ctx, const uint8_t *data, int data_len)
 
 		case M_APP1:
 			len = MAKEWORD(p[3], p[2]);
-			ctx->app1_data = malloc(len + 2);
-			if (!ctx->app1_data)
-				return ERR_MALLOC;
-			memcpy(ctx->app1_data, p, len + 2);
-			ctx->app1_len = len + 2;
+			if (ctx->app1_data == 0)
+			{
+				ctx->app1_data = malloc(len + 2);
+				if (!ctx->app1_data)
+					return ERR_MALLOC;
+				memcpy(ctx->app1_data, p, len + 2);
+				ctx->app1_len = len + 2;
+			}
+			else
+			{
+				ctx->app1_xmp_data = malloc(len + 2);
+				if (!ctx->app1_xmp_data)
+					return ERR_MALLOC;
+				memcpy(ctx->app1_xmp_data, p, len + 2);
+				ctx->app1_xmp_len = len + 2;
+			}
 			p += len + 2;
 			break;
 

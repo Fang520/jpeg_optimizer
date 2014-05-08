@@ -28,6 +28,12 @@ int build_opt_header(jpeg_ctx_t *ctx, uint8_t output[], int output_len)
 		p += ctx->app1_len;
 	}
 
+	if (ctx->app1_xmp_len > 0)
+	{
+		memcpy(p, ctx->app1_xmp_data, ctx->app1_xmp_len);
+		p += ctx->app1_xmp_len;
+	}
+
 	memcpy(p, fixed_dqt_head, sizeof(fixed_dqt_head));
 	p += sizeof(fixed_dqt_head);
 	memcpy(p, std_quant_table[ctx->qscale], 64);

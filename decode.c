@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include "decode.h"
 #include "getbits_inline.h"
+#include "log.h"
 
 int build_dec_vlc(jpeg_ctx_t *ctx)
 {
@@ -28,7 +29,10 @@ int open_dec_bitstream(jpeg_ctx_t *ctx, const uint8_t *buf, int len)
 
 	ctx->in_bits_buf = (uint8_t*)malloc(len);
 	if (!ctx->in_bits_buf)
+	{
+		log("JO: malloc fail in open_dec_bitstream\n");
 		return -1;
+	}
 
 	src = buf;
 	dst = ctx->in_bits_buf;
@@ -69,7 +73,10 @@ int decode_dc(jpeg_ctx_t *ctx, int yuv_index, short mb[])
 
 	code = get_vlc(&ctx->getbit_ctx, ctx->dec_vlcs[0][yuv_index ? 1 : 0].table);
 	if (code < 0)
+	{
+		log("JO: format wrong, huffman decode fail in decode_dc\n");
 		return -1;
+	}
 
 	if (code)
 	{
@@ -92,7 +99,10 @@ int decode_ac(jpeg_ctx_t *ctx, int yuv_index, short mb[])
 	{
 		code = get_vlc(gb, table);
 		if (code < 0)
+		{
+			log("JO: format wrong, huffman decode fail in decode_ac\n");
 			return -1;
+		}
 
 		zero_num += code >> 4; //尼玛, 构造vlc时篡改符号值，每个符号加了16，原来就是了这里能够自动zero_num + 1啊，太扣效率了吧
 		len = code & 0xf;

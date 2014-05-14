@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include "log.h"
 #include "parse_header.h"
 
 #define MAKEWORD(a, b) ((uint16_t)(((uint8_t)(a)) | ((uint16_t)((uint8_t)(b))) << 8))
@@ -49,12 +50,18 @@ int parse_header(jpeg_ctx_t *ctx, const uint8_t *data, int data_len)
 	if (p[0] == 0xff && p[1] == M_SOI)
 		p += 2;
 	else
+	{
+		log("JO: format wrong, not found SOI\n");
 		return ERR_SOI;
+	}
 
 	while (p - data < data_len)
 	{
 		if (p[0] != 0xff)
+		{
+			log("JO: format wrong, not found 0xFF\n");
 			return ERR_FORMAT;
+		}
 
 		switch (p[1])
 		{
@@ -66,7 +73,10 @@ int parse_header(jpeg_ctx_t *ctx, const uint8_t *data, int data_len)
 				break;
 			}
 			else
+			{
+				log("JO: format wrong, not found JFIF\n");
 				return ERR_APP0_IDENTIFIER;
+			}
 
 		case M_APP1:
 			len = MAKEWORD(p[3], p[2]);
@@ -74,7 +84,10 @@ int parse_header(jpeg_ctx_t *ctx, const uint8_t *data, int data_len)
 			{
 				ctx->app1_data = malloc(len + 2);
 				if (!ctx->app1_data)
+				{
+					log("JO: malloc fail of app1_data\n");
 					return ERR_MALLOC;
+				}
 				memcpy(ctx->app1_data, p, len + 2);
 				ctx->app1_len = len + 2;
 			}
@@ -82,7 +95,10 @@ int parse_header(jpeg_ctx_t *ctx, const uint8_t *data, int data_len)
 			{
 				ctx->app1_xmp_data = malloc(len + 2);
 				if (!ctx->app1_xmp_data)
+				{
+					log("JO: malloc fail of app1_xmp_data\n");
 					return ERR_MALLOC;
+				}
 				memcpy(ctx->app1_xmp_data, p, len + 2);
 				ctx->app1_xmp_len = len + 2;
 			}
@@ -97,7 +113,10 @@ int parse_header(jpeg_ctx_t *ctx, const uint8_t *data, int data_len)
 			{
 				n = *pt++;
 				if (n >> 4 != 0)
+				{
+					log("JO: DQT precision not support 16 bit\n");
 					return ERR_DQT_PRECISION;
+				}
 				for (i = 0; i < 64; i++)
 					ctx->dqt[n & 0x0f][i] = *pt++;
 				left -= 65;
@@ -107,9 +126,15 @@ int parse_header(jpeg_ctx_t *ctx, const uint8_t *data, int data_len)
 
 		case M_SOF0:
 			if (p[4] != 8)
+			{
+				log("JO: sample precision not support 12 or 16 bit\n");
 				return ERR_SOF0_PRECISION;
+			}
 			if (p[9] != 3)
+			{
+				log("JO: not support gray or CMYK color mode in SOF0\n");
 				return ERR_SOF0_COMPONENTS;
+			}
 			len = MAKEWORD(p[3], p[2]);
 			ctx->height = MAKEWORD(p[6], p[5]);
 			ctx->width = MAKEWORD(p[8], p[7]);
@@ -158,12 +183,16 @@ int parse_header(jpeg_ctx_t *ctx, const uint8_t *data, int data_len)
 			break;
 
 		case M_DRI:
+			log("JO: not support DRI(slice)\n");
 			return ERR_DRI_NOTSUPPORT;
 			break;
 
 		case M_SOS:
 			if (p[4] != 3)
+			{
+				log("JO: not support gray or CMYK color mode in SOS\n");
 				return ERR_SOS_COMPONENTS;
+			}
 			len = MAKEWORD(p[3], p[2]);
 			pt = p + 5;
 			for (i = 0; i < 3; i++)
@@ -177,9 +206,19 @@ int parse_header(jpeg_ctx_t *ctx, const uint8_t *data, int data_len)
 			return p - data;
 			break;
 
-		case M_SOF1:
 		case M_SOF2:
+			log("JO: not support progressive mode\n");
+			return ERR_SOF_NOTSUPPORT;
+			break;
+
 		case M_SOF3:
+		case M_SOF48:
+		case M_LSE:
+			log("JO: not support lossless mode\n");
+			return ERR_SOF_NOTSUPPORT;
+			break;
+
+		case M_SOF1:
 		case M_SOF5:
 		case M_SOF6:
 		case M_SOF7:
@@ -190,8 +229,7 @@ int parse_header(jpeg_ctx_t *ctx, const uint8_t *data, int data_len)
 		case M_SOF14:
 		case M_SOF15:
 		case M_JPG:
-		case M_SOF48:
-		case M_LSE:
+			log("JO: not support app id=%x\n", p[1]);
 			return ERR_SOF_NOTSUPPORT;
 			break;
 
@@ -211,6 +249,7 @@ int parse_header(jpeg_ctx_t *ctx, const uint8_t *data, int data_len)
 			break;
 
 		case M_EOI:
+			log("JO: format strange, EOI found early\n");
 			return ERR_EOI;
 			break;
 
@@ -220,6 +259,7 @@ int parse_header(jpeg_ctx_t *ctx, const uint8_t *data, int data_len)
 		}
 	}
 
+	log("JO: format wrong, not found SOS\n");
 	return ERR_SOS_NOTFOUND;
 }
 

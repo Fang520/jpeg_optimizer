@@ -4,6 +4,7 @@
 #include "build_opt_header.h"
 #include "std_huffman_table.h"
 #include "std_quant_table.h"
+#include "log.h"
 
 const uint8_t fixed_app0[] = { 0xff, 0xd8, 0xff, 0xe0, 0, 0x10, 0x4a, 0x46, 0x49, 0x46, 0, 0x1, 0x1, 0x1, 0, 0x60, 0, 0x60, 0, 0 };
 const uint8_t fixed_sos[] = { 0xff, 0xda, 0, 0xc, 0x3, 0x1, 0, 0x2, 0x11, 0x3, 0x11, 0, 0x3f, 0 };
@@ -14,8 +15,11 @@ int build_opt_header(jpeg_ctx_t *ctx, uint8_t output[], int output_len)
 {
 	uint8_t *p;
 
-	if (output_len < ctx->app1_len + 554)
+	if (output_len < (ctx->app1_len + ctx->app1_xmp_len + 554))
+	{
+		log("JO: output buffer size is too short, %d\n", output_len);
 		return -1;
+	}
 
 	p = output;
 

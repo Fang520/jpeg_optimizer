@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include "huffman_fast_dec.h"
 #include "canonical_huffman.h"
+#include "log.h"
 
 #define MAX(a,b) ((a) > (b) ? (a) : (b))
 #define MIN(a,b) ((a) > (b) ? (b) : (a))
@@ -21,9 +22,12 @@ static int alloc_table(VLC *vlc, int size)
 	vlc->table_size += size;
 	if (vlc->table_size > vlc->table_allocated) {
 		vlc->table_allocated += (1 << vlc->bits);
-		vlc->table = realloc(vlc->table, vlc->table_allocated * sizeof(int16_t) * 2);
+		vlc->table = realloc(vlc->table, vlc->table_allocated * sizeof(int16_t)* 2);
 		if (!vlc->table)
+		{
+			log("JO: realloc fail in alloc_table\n");
 			return -1;
+		}
 	}
 	return index;
 }
@@ -33,11 +37,9 @@ static int build_table(VLC *vlc, int table_nb_bits, int nb_codes, VLCcode *codes
 	int table_size, table_index, index, code_prefix, symbol, subtable_bits;
 	int i, j, k, n, nb, inc;
 	uint32_t code;
-	int16_t (*table)[2];
+	int16_t(*table)[2];
 
 	table_size = 1 << table_nb_bits;
-	if (table_nb_bits > 30)
-		return -1;
 	table_index = alloc_table(vlc, table_size);
 	if (table_index < 0)
 		return -1;
@@ -58,6 +60,7 @@ static int build_table(VLC *vlc, int table_nb_bits, int nb_codes, VLCcode *codes
 			inc = 1;
 			for (k = 0; k < nb; k++) {
 				if (table[j][1] /*bits*/ != 0) {
+					log("JO: error in build_table\n");
 					return -1;
 				}
 				table[j][1] = (int16_t)n; //bits
@@ -115,7 +118,10 @@ static int ff_init_vlc_sparse(VLC *vlc, int nb_bits, int nb_codes, const uint8_t
 
 	buf = malloc((nb_codes + 1) * sizeof(VLCcode));
 	if (!buf)
+	{
+		log("malloc fail in ff_init_vlc_sparse\n");
 		return -1;
+	}
 
 	j = 0;
 	for (i = 0; i < nb_codes; i++)

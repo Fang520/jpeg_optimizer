@@ -7,6 +7,7 @@
 #include "decode.h"
 #include "re_quantize.h"
 #include "jpeg_optimizer.h"
+#include "log.h"
 
 /*
 jpeg要点
@@ -18,9 +19,13 @@ jpeg要点
 6 jpeg支持分片（dri），一组mcu后，码流需要重新初始化，和h264的slice很像，解决错误传递的问题，没支持
 7 码流里数据的正负号用最高位表示，高位是1为正
 8 app1字段里存的是相机光圈这些信息（Exif），这个很常用，发现图片有这个字段时，需要保留
-9 huffman码表是用范式哈夫曼存储的，这个只用两个数组就能构建出tree，很巧妙
-10 jpeg还主要有无损压缩和渐进压缩两种算法，没支持
-11 所有除法运算均要优化，特别量化算法 level = round(val / quant);
+9 app1字段可能出现两次，photoshop会添加一个xmp数据在新的app1里，目前保留了这个字段
+10 huffman码表是用范式哈夫曼存储的，这个只用两个数组就能构建出tree，很巧妙
+11 jpeg还主要有无损压缩和渐进压缩两种算法，没支持
+12 量化因为循环64次，是所有函数里最费时的，需要尽力优化
+13 日志输出遵循这个原则: 
+	a 对于程序员的信息，在出错现场立即输出日志，不定义错误类型，不通过返回值向上输出，上级不在打印信息
+	b 对于用户需要的错误信息，不需要打印，定义错误类型，逐级传递，最后通过用户api输出错误id
 
 优化的地方
 1 去掉idct, ict
@@ -28,10 +33,10 @@ jpeg要点
 3 去掉yuv转换（以前有的图片解码出来不是yuv420或411的，需要转成yuv420才能编码）
 4 仅支持baseline，不支持灰度jpg，不支持dri，大大简化算法，提高性能
 5 只使用一个量化表（一般都是2个，亮度色度各一个）
-6 编码使用标准的huffman码表，只需生成一次，多次使用（前提是一个进程要能优化多张图片，不能优化一张就关闭）
-7 如果原始图片用的是标准量化表，那么解码时将不生成解码表，极大节约时间（还没做完）
-8 使用了ffmpeg里的码流读写和huffman多级查表算法，速度是所用软件中最快的，超过libjpeg
-9 使用30级固定量化表
+6 使用了ffmpeg里的码流读写和huffman多级查表算法，速度是所用软件中最快的，超过libjpeg
+7 使用30级固定量化表
+8 编码使用标准的huffman码表，只需生成一次，多次使用（前提是一个进程要能优化多张图片，不能优化一张就关闭）(todo)
+9 预先生成标准解码表，如果原始图片用的是标准huffman表，那么解码时将不生成解码表，极大节约时间（todo）
 */
 
 static void free_ctx(jpeg_ctx_t *ctx)
@@ -136,14 +141,23 @@ int optimize_jpeg(const uint8_t *input, int *input_len, uint8_t *output, int *ou
 	int ret, out_head_len, in_head_len;
 
 	if (qscale < 0 || qscale >= 30)
+	{
+		log("JO: qscale range is 0-29, %d\n", qscale);
 		return -1;
+	}
 
 	if (*output_len < *input_len)
+	{
+		log("JO: output buffer size is not safe, maybe cause segment fault, %d\n", *output_len);
 		return -1;
+	}
 
 	ctx = (jpeg_ctx_t *)malloc(sizeof(jpeg_ctx_t));
 	if (!ctx)
+	{
+		log("JO: malloc fail in optimize_jpeg\n");
 		return -1;
+	}
 
 	memset(ctx, 0, sizeof(jpeg_ctx_t));
 	ctx->qscale = qscale;

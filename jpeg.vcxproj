@@ -90,6 +90,7 @@
     <ClInclude Include="getbits_inline.h" />
     <ClInclude Include="huffman_fast_dec.h" />
     <ClInclude Include="jpeg_optimizer.h" />
+    <ClInclude Include="log.h" />
     <ClInclude Include="parse_header.h" />
     <ClInclude Include="putbits_inline.h" />
     <ClInclude Include="re_quantize.h" />

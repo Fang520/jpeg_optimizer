@@ -9,8 +9,8 @@
 
 int main(int argc, char** argv)
 {
-	char *filename_in = "/root/4m.jpg";
-	char *filename_out = "4m_opt.jpg";
+	char *filename_in = "d:\\6M.jpg";
+	char *filename_out = "d:\\6M_opt.jpg";
 	int qscale = 10;
 
 	FILE *fp_in, *fp_out;
@@ -111,10 +111,11 @@ int main(int argc, char** argv)
 	free(buf_in);
 	fclose(fp_in);
 
-	printf("time: %d, inbuf left: %d, outbuf left: %d\n", 
+	printf("time: %d, inbuf left: %d, outbuf left: %d, optimization rate=%.2f\n", 
 		(int)(end_time - begin_time), 
 		len_in - len_in_act, 
-		len_out - len_out_act);
+		len_out - len_out_act,
+		(double)(len_out_act) / len_in_act);
 
 #ifdef _WIN32
 	getchar();

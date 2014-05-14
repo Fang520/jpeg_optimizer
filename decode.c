@@ -26,6 +26,7 @@ int open_dec_bitstream(jpeg_ctx_t *ctx, const uint8_t *buf, int len)
 	const uint8_t *src;
 	uint8_t *dst;
 	uint8_t x;
+	int diff;
 
 	ctx->in_bits_buf = (uint8_t*)malloc(len);
 	if (!ctx->in_bits_buf)
@@ -36,6 +37,7 @@ int open_dec_bitstream(jpeg_ctx_t *ctx, const uint8_t *buf, int len)
 
 	src = buf;
 	dst = ctx->in_bits_buf;
+	diff = 0;
 
 	while (src - buf < len)
 	{
@@ -46,13 +48,18 @@ int open_dec_bitstream(jpeg_ctx_t *ctx, const uint8_t *buf, int len)
 			while (src - buf < len && x == 0xff)
 				x = *src++;
 			if (x == 0)
+			{
+				diff++;
 				continue;
+			}
 			else
 				break;
 		}
 	}
 
 	init_get_bits(&ctx->getbit_ctx, ctx->in_bits_buf, (dst - ctx->in_bits_buf) * 8);
+
+	ctx->diff_len = diff;
 
 	return 0;
 }

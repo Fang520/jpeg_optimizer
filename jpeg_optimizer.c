@@ -230,7 +230,7 @@ int optimize_jpeg(const uint8_t *input, int *input_len, uint8_t *output, int *ou
 	}
 
 	*output_len = out_head_len + ctx->out_bits_len;
-	*input_len = in_head_len + ctx->in_bits_len;
+	*input_len = in_head_len + ctx->in_bits_len + ctx->diff_len;
 	free_ctx(ctx);
 
 	return 0;

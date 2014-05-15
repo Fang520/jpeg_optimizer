@@ -18,6 +18,7 @@ int main(int argc, char** argv)
 	uint8_t *buf_out;
 	int i, ret, len_in, len_out, len_in_act, len_out_act;
 	clock_t begin_time, end_time;
+	uint32_t handle;
 
 	if (argc >= 4)
 	{
@@ -66,22 +67,34 @@ int main(int argc, char** argv)
 
 	begin_time = clock();
 
-	for (i = 0; i < 1; i++)
+	handle = jpeg_optimizer_open(qscale);
+	if (!handle)
+	{
+		printf("jpeg optimizer open fail\n");
+		free(buf_out);
+		free(buf_in);
+		fclose(fp_in);
+		return -1;
+	}
+
+	for (i = 0; i < 6; i++)
 	{	
 		len_in_act = len_in;
 		len_out_act = len_out;
+		clock_t time = clock();
 
-
-		ret = optimize_jpeg(buf_in, &len_in_act, buf_out, &len_out_act, qscale);
+		ret = jpeg_optimizer_run(handle, buf_in, &len_in_act, buf_out, &len_out_act);
 		if (ret != 0)
 		{
-			printf("optimize jpeg fail\n");
-			free(buf_out);
-			free(buf_in);
-			fclose(fp_in);
-			return -1;
+			printf("%d, optimize jpeg fail\n", i);
+		}
+		else
+		{
+			printf("%d, optimize ok, time=%dms\n", i, (int)(clock() - time));
 		}
 	}
+
+	jpeg_optimizer_close(handle);
 
 	end_time = clock();
 

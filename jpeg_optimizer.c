@@ -39,23 +39,72 @@ jpeg要点
 9 预先生成标准解码表，如果原始图片用的是标准huffman表，那么解码时将不生成解码表，极大节约时间（todo）
 */
 
-static void free_ctx(jpeg_ctx_t *ctx)
+static void clean_fixed_data(jpeg_ctx_t *ctx)
 {
-	if (ctx->app1_data)
-		free(ctx->app1_data);
-	if (ctx->app1_xmp_data)
-		free(ctx->app1_xmp_data);
-	if (ctx->dec_vlcs[0][0].table)
-		free(ctx->dec_vlcs[0][0].table);
-	if (ctx->dec_vlcs[0][1].table)
-		free(ctx->dec_vlcs[0][1].table);
-	if (ctx->dec_vlcs[1][0].table)
-		free(ctx->dec_vlcs[1][0].table);
-	if (ctx->dec_vlcs[1][1].table)
-		free(ctx->dec_vlcs[1][1].table);
-	if (ctx->in_bits_buf)
-		free(ctx->in_bits_buf);
-	free(ctx);
+	if (ctx)
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	{}
+}
+
+static void clean_last_data(jpeg_ctx_t *ctx)
+{
+	int i;
+
+	if (ctx)
+	{
+		if (ctx->app1_data)
+		{
+			free(ctx->app1_data);
+			ctx->app1_data = 0;
+		}
+		if (ctx->app1_xmp_data)
+		{
+			free(ctx->app1_xmp_data);
+			ctx->app1_xmp_data = 0;
+		}
+		if (ctx->dec_vlcs[0][0].table)
+		{
+			free(ctx->dec_vlcs[0][0].table);
+			ctx->dec_vlcs[0][0].table = 0;
+		}
+		if (ctx->dec_vlcs[0][1].table)
+		{
+			free(ctx->dec_vlcs[0][1].table);
+			ctx->dec_vlcs[0][1].table = 0;
+		}
+		if (ctx->dec_vlcs[1][0].table)
+		{
+			free(ctx->dec_vlcs[1][0].table);
+			ctx->dec_vlcs[1][0].table = 0;
+		}
+		if (ctx->dec_vlcs[1][1].table)
+		{
+			free(ctx->dec_vlcs[1][1].table);
+			ctx->dec_vlcs[1][1].table = 0;
+		}
+		if (ctx->in_bits_buf)
+		{
+			free(ctx->in_bits_buf);
+			ctx->in_bits_buf = 0;
+		}
+		for (i = 0; i < 3; i++)
+		{
+			ctx->last_dc[i] = 0;
+			ctx->new_last_dc[i] = 0;
+		}
+	}
 }
 
 static int process_mb(jpeg_ctx_t *ctx, int yuv_index)
@@ -135,14 +184,14 @@ static int process_body(jpeg_ctx_t *ctx)
 	return 0;
 }
 
-int optimize_jpeg(const uint8_t *input, int *input_len, uint8_t *output, int *output_len, int qscale)
+int jpeg_optimizer_run(uint32_t handle, const uint8_t *input, int *input_len, uint8_t *output, int *output_len)
 {
 	jpeg_ctx_t *ctx;
 	int ret, out_head_len, in_head_len;
 
-	if (qscale < 0 || qscale >= 30)
+	if (!handle)
 	{
-		log("JO: qscale range is 0-29, %d\n", qscale);
+		log("JO: handle is null in jpeg_optimizer_run\n");
 		return -1;
 	}
 
@@ -152,87 +201,83 @@ int optimize_jpeg(const uint8_t *input, int *input_len, uint8_t *output, int *ou
 		return -1;
 	}
 
-	ctx = (jpeg_ctx_t *)malloc(sizeof(jpeg_ctx_t));
-	if (!ctx)
-	{
-		log("JO: malloc fail in optimize_jpeg\n");
-		return -1;
-	}
-
-	memset(ctx, 0, sizeof(jpeg_ctx_t));
-	ctx->qscale = qscale;
+	ctx = (jpeg_ctx_t *)handle;
+	clean_last_data(ctx);
 
 	ret = parse_header(ctx, input, *input_len);
 	if (ret <= 0)
-	{
-		free_ctx(ctx);
 		return -1;
-	}
 	
 	in_head_len = ret;
 	ret = open_dec_bitstream(ctx, input + ret, *input_len - ret);
 	if (ret != 0)
-	{
-		free_ctx(ctx);
 		return -1;
-	}
 
 	ret = build_opt_header(ctx, output, *output_len);
 	if (ret <= 0)
-	{
-		free_ctx(ctx);
 		return -1;
-	}
 	
 	out_head_len = ret;
-	ret = open_enc_bitstream(ctx, output + ret, *output_len - ret);
-	if (ret != 0)
-	{
-		free_ctx(ctx);
-		return -1;
-	}
+	open_enc_bitstream(ctx, output + ret, *output_len - ret);
 
-	ret = build_enc_vlc(ctx);
-	if (ret != 0)
-	{
-		free_ctx(ctx);
-		return -1;
-	}
-	
 	ret = build_dec_vlc(ctx);
 	if (ret != 0)
-	{
-		free_ctx(ctx);
 		return -1;
-	}
 
 	prepare_middle_quant_table(ctx);
 
 	ret = process_body(ctx);
 	if (ret != 0)
-	{
-		free_ctx(ctx);
 		return -1;
-	}
 
-	ret = close_enc_bitstream(ctx);
-	if (ret != 0)
-	{
-		free_ctx(ctx);
-		return -1;
-	}
+	close_enc_bitstream(ctx);
 
-	ret = close_dec_bitstream(ctx);
-	if (ret != 0)
-	{
-		free_ctx(ctx);
-		return -1;
-	}
+	close_dec_bitstream(ctx);
 
 	*output_len = out_head_len + ctx->out_bits_len;
 	*input_len = in_head_len + ctx->in_bits_len + ctx->diff_len;
-	free_ctx(ctx);
 
 	return 0;
 }
 
+uint32_t jpeg_optimizer_open(int qscale)
+{
+	jpeg_ctx_t *ctx;
+
+	if (qscale < 0 || qscale >= 30)
+	{
+		log("JO: qscale range is 0-29, %d\n", qscale);
+		return 0;
+	}
+
+	ctx = (jpeg_ctx_t *)malloc(sizeof(jpeg_ctx_t));
+	if (!ctx)
+	{
+		log("JO: malloc fail in jpeg_optimizer_open\n");
+		return 0;
+	}
+
+	memset(ctx, 0, sizeof(jpeg_ctx_t));
+	ctx->qscale = qscale;
+
+	build_enc_vlc(ctx);
+
+	return (uint32_t)ctx;
+}
+
+void jpeg_optimizer_close(uint32_t handle)
+{
+	jpeg_ctx_t *ctx;
+
+	if (!handle)
+	{
+		log("JO: handle is null in jpeg_optimizer_close\n");
+		return;
+	}
+
+	ctx = (jpeg_ctx_t *)handle;
+
+	clean_last_data(ctx);
+
+	free(ctx);
+}

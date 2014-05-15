@@ -50,13 +50,12 @@ static int INLINE av_log2_c(unsigned int v)
 	return n;
 }
 
-int build_enc_vlc(jpeg_ctx_t *ctx)
+void build_enc_vlc(jpeg_ctx_t *ctx)
 {
 	make_canonical_huffman_codes(ctx->dht_dc_hash[0].size, ctx->dht_dc_hash[0].code, std_huffman_bits_dc_luminance, std_huffman_val_dc);
 	make_canonical_huffman_codes(ctx->dht_dc_hash[1].size, ctx->dht_dc_hash[1].code, std_huffman_bits_dc_chrominance, std_huffman_val_dc);
 	make_canonical_huffman_codes(ctx->dht_ac_hash[0].size, ctx->dht_ac_hash[0].code, std_huffman_bits_ac_luminance, std_huffman_val_ac_luminance);
 	make_canonical_huffman_codes(ctx->dht_ac_hash[1].size, ctx->dht_ac_hash[1].code, std_huffman_bits_ac_chrominance, std_huffman_val_ac_chrominance);
-	return 0;
 }
 
 void encode_dc(jpeg_ctx_t *ctx, int yuv_index, short mb[])
@@ -142,11 +141,10 @@ void encode_ac(jpeg_ctx_t *ctx, int yuv_index, short mb[])
 		put_bits(pb, huff_size[0], huff_code[0]);
 }
 
-int open_enc_bitstream(jpeg_ctx_t *ctx, uint8_t *buf, int len)
+void open_enc_bitstream(jpeg_ctx_t *ctx, uint8_t *buf, int len)
 {
 	init_put_bits(&ctx->putbit_ctx, buf, len);
 	ctx->out_bits_buf = buf;
-	return 0;
 }
 
 static int escape_FF(unsigned char* output_buf, int len)
@@ -187,7 +185,7 @@ static void byte_stuffing(PutBitContext * pbc)
 	}
 }
 
-int close_enc_bitstream(jpeg_ctx_t *ctx)
+void close_enc_bitstream(jpeg_ctx_t *ctx)
 {
 	int len;
 	PutBitContext *pb;
@@ -199,6 +197,5 @@ int close_enc_bitstream(jpeg_ctx_t *ctx)
 	ctx->out_bits_buf[len] = 0xff;
 	ctx->out_bits_buf[len + 1] = 0xd9;
 	ctx->out_bits_len = len + 2;
-	return 0;
 }
 

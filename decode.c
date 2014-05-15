@@ -64,14 +64,13 @@ int open_dec_bitstream(jpeg_ctx_t *ctx, const uint8_t *buf, int len)
 	return 0;
 }
 
-int close_dec_bitstream(jpeg_ctx_t *ctx)
+void close_dec_bitstream(jpeg_ctx_t *ctx)
 {
 	int len;
 	
 	len = get_bits_count(&ctx->getbit_ctx);
 	len = (len + 7) >> 3;
 	ctx->in_bits_len = len + 2;
-	return 0;
 }
 
 int decode_dc(jpeg_ctx_t *ctx, int yuv_index, short mb[])

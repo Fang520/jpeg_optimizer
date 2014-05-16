@@ -12,14 +12,14 @@
 /*
 jpeg要点
 1 huffman解码很慢，传统的先建树在深度递归根本不能用，一定要用多级查表法，这个算法比较复杂
-2 码流里遇到ff要编码成ff00，这个在解码和编码时都要过滤一遍
+2 码流里遇到ff要编码成ff00，这个在解码和编码时都要过滤一遍（为了实现这一点，不得已malloc了一块和图片一样大的内存，感觉很浪费）
 3 码流结束要字节边界对齐，要补1
 4 宏块如果后续全为0，用eob截断
 5 huffman编码其实只是编码数据的长度，码流是以不断重复的len+data这样的结构组织的，后面的数据不编码（但所有的资料上都写的超级复杂）
 6 jpeg支持分片（dri），一组mcu后，码流需要重新初始化，和h264的slice很像，解决错误传递的问题，没支持
 7 码流里数据的正负号用最高位表示，高位是1为正
 8 app1字段里存的是相机光圈这些信息（Exif），这个很常用，发现图片有这个字段时，需要保留
-9 app1字段可能出现两次，photoshop会添加一个xmp数据在新的app1里，目前保留了这个字段
+9 app1字段可能出现两次，photoshop会添加一个xmp数据在新的app1里，目前保留了这个字段（原来app1有可能出现两次，之前因为这个导致内存泄漏）
 10 huffman码表是用范式哈夫曼存储的，这个只用两个数组就能构建出tree，很巧妙
 11 jpeg还主要有无损压缩和渐进压缩两种算法，没支持
 12 量化因为循环64次，是所有函数里最费时的，需要尽力优化
@@ -35,27 +35,21 @@ jpeg要点
 5 只使用一个量化表（一般都是2个，亮度色度各一个）
 6 使用了ffmpeg里的码流读写和huffman多级查表算法，速度是所用软件中最快的，超过libjpeg
 7 使用30级固定量化表
-8 编码使用标准的huffman码表，只需生成一次，多次使用（前提是一个进程要能优化多张图片，不能优化一张就关闭）(todo)
-9 预先生成标准解码表，如果原始图片用的是标准huffman表，那么解码时将不生成解码表，极大节约时间（todo）
+8 连续优化多张图片时，编码使用标准的huffman码表，只需生成一次
+9 连续优化多张图片时，预先生成标准huffman解码表，如果原始图片用的是标准huffman表，那么使用预生成解码表，极大节约时间（todo）
+10 连续优化多张图片时，malloc出的内存尽量移交给下一张图片使用，避免多次malloc, free （todo)
 */
 
-static void clean_fixed_data(jpeg_ctx_t *ctx)
+static void clean_global_data(jpeg_ctx_t *ctx)
 {
 	if (ctx)
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	{}
+	{
+		if (ctx->in_bits_buf)
+		{
+			free(ctx->in_bits_buf);
+			ctx->in_bits_buf = 0;
+		}
+	}
 }
 
 static void clean_last_data(jpeg_ctx_t *ctx)
@@ -93,11 +87,6 @@ static void clean_last_data(jpeg_ctx_t *ctx)
 		{
 			free(ctx->dec_vlcs[1][1].table);
 			ctx->dec_vlcs[1][1].table = 0;
-		}
-		if (ctx->in_bits_buf)
-		{
-			free(ctx->in_bits_buf);
-			ctx->in_bits_buf = 0;
 		}
 		for (i = 0; i < 3; i++)
 		{
@@ -278,6 +267,8 @@ void jpeg_optimizer_close(uint32_t handle)
 	ctx = (jpeg_ctx_t *)handle;
 
 	clean_last_data(ctx);
+
+	clean_global_data(ctx);
 
 	free(ctx);
 }

@@ -28,11 +28,29 @@ int open_dec_bitstream(jpeg_ctx_t *ctx, const uint8_t *buf, int len)
 	uint8_t x;
 	int diff;
 
-	ctx->in_bits_buf = (uint8_t*)malloc(len);
+
 	if (!ctx->in_bits_buf)
 	{
-		log("JO: malloc fail in open_dec_bitstream\n");
-		return -1;
+		ctx->in_bits_buf = (uint8_t*)malloc(len);
+		if (!ctx->in_bits_buf)
+		{
+			log("JO: malloc fail in open_dec_bitstream\n");
+			return -1;
+		}
+		ctx->buf_len = len;
+	}
+	else
+	{
+		if (ctx->buf_len < len)
+		{
+			ctx->in_bits_buf = (uint8_t*)realloc(ctx->in_bits_buf, len);
+			if (!ctx->in_bits_buf)
+			{
+				log("JO: realloc fail in open_dec_bitstream\n");
+				return -1;
+			}
+			ctx->buf_len = len;
+		}
 	}
 
 	src = buf;

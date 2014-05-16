@@ -46,7 +46,7 @@ typedef struct {
 	uint8_t ht_ac_index[3];
 	uint8_t nop;
 	uint8_t *in_bits_buf, *out_bits_buf;
-	int in_bits_len, out_bits_len, diff_len;
+	int in_bits_len, out_bits_len, diff_len, buf_len;
 	PutBitContext putbit_ctx;
 	GetBitContext getbit_ctx;
 	VLC dec_vlcs[2][2];

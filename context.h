@@ -37,7 +37,7 @@ typedef struct {
 	dht_ac_t dht_ac[2];
 	dht_dc_hash_t dht_dc_hash[2];
 	dht_ac_hash_t dht_ac_hash[2];
-	uint8_t dqt[4][64];
+	uint8_t dqt[3][64];
 	uint32_t mid_dqt[3][64];
 	uint8_t rate_h[3];
 	uint8_t rate_v[3];

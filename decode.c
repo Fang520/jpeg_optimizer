@@ -1,24 +1,107 @@
 #include <stdlib.h>
+#include <memory.h>
 #include "decode.h"
 #include "getbits_inline.h"
+#include "std_huffman_table.h"
 #include "log.h"
 
 int build_dec_vlc(jpeg_ctx_t *ctx)
 {
 	int ret;
-	ret = build_vlc(&ctx->dec_vlcs[0][0], ctx->dht_dc[0].len, ctx->dht_dc[0].val, 12, 0);
-	if (ret != 0)
-		return -1;
-	ret = build_vlc(&ctx->dec_vlcs[0][1], ctx->dht_dc[1].len, ctx->dht_dc[1].val, 12, 0);
-	if (ret != 0)
-		return -1;
-	ret = build_vlc(&ctx->dec_vlcs[1][0], ctx->dht_ac[0].len, ctx->dht_ac[0].val, 251, 1);
-	if (ret != 0)
-		return -1;
-	ret = build_vlc(&ctx->dec_vlcs[1][1], ctx->dht_ac[1].len, ctx->dht_ac[1].val, 251, 1);
-	if (ret != 0)
-		return -1;
+
+	if (ctx->is_std_vlc[0][0] == 0)
+	{
+		ret = build_vlc(&ctx->dec_vlcs[0][0], ctx->dht_dc[0].len, ctx->dht_dc[0].val, 12, 0);
+		if (ret != 0)
+			return -1;
+	}
+	else
+		ctx->dec_vlcs[0][0].table = ctx->std_dec_vlcs[0][0].table;
+
+	if (ctx->is_std_vlc[0][1] == 0)
+	{
+		ret = build_vlc(&ctx->dec_vlcs[0][1], ctx->dht_dc[1].len, ctx->dht_dc[1].val, 12, 0);
+		if (ret != 0)
+			return -1;
+	}
+	else
+		ctx->dec_vlcs[0][1].table = ctx->std_dec_vlcs[0][1].table;
+
+	if (ctx->is_std_vlc[1][0] == 0)
+	{
+		ret = build_vlc(&ctx->dec_vlcs[1][0], ctx->dht_ac[0].len, ctx->dht_ac[0].val, 251, 1);
+		if (ret != 0)
+			return -1;
+	}
+	else
+		ctx->dec_vlcs[1][0].table = ctx->std_dec_vlcs[1][0].table;
+
+	if (ctx->is_std_vlc[1][1] == 0)
+	{
+		ret = build_vlc(&ctx->dec_vlcs[1][1], ctx->dht_ac[1].len, ctx->dht_ac[1].val, 251, 1);
+		if (ret != 0)
+			return -1;
+	}
+	else
+		ctx->dec_vlcs[1][1].table = ctx->std_dec_vlcs[1][1].table;
+
 	return 0;
+}
+
+int build_std_dec_vlc(jpeg_ctx_t *ctx)
+{
+	int ret;
+
+	ret = build_vlc(&ctx->std_dec_vlcs[0][0], std_huffman_bits_dc_luminance, std_huffman_val_dc, 12, 0);
+	if (ret != 0)
+		return -1;
+
+	ret = build_vlc(&ctx->std_dec_vlcs[0][1], std_huffman_bits_dc_chrominance, std_huffman_val_dc, 12, 0);
+	if (ret != 0)
+		return -1;
+
+	ret = build_vlc(&ctx->std_dec_vlcs[1][0], std_huffman_bits_ac_luminance, std_huffman_val_ac_luminance, 251, 1);
+	if (ret != 0)
+		return -1;
+
+	ret = build_vlc(&ctx->std_dec_vlcs[1][1], std_huffman_bits_ac_chrominance, std_huffman_val_ac_chrominance, 251, 1);
+	if (ret != 0)
+		return -1;
+
+	return 0;
+}
+
+void check_huffman_is_std(jpeg_ctx_t *ctx)
+{
+	const uint8_t *cur_lens, *std_lens;
+
+	cur_lens = ctx->dht_dc[0].len;
+	std_lens = std_huffman_bits_dc_luminance;
+	if (memcmp(cur_lens, std_lens, 16) == 0)
+		ctx->is_std_vlc[0][0] = 1;
+	else
+		ctx->is_std_vlc[0][0] = 0;
+
+	cur_lens = ctx->dht_dc[1].len;
+	std_lens = std_huffman_bits_dc_chrominance;
+	if (memcmp(cur_lens, std_lens, 16) == 0)
+		ctx->is_std_vlc[0][1] = 1;
+	else
+		ctx->is_std_vlc[0][1] = 0;
+
+	cur_lens = ctx->dht_ac[0].len;
+	std_lens = std_huffman_bits_ac_luminance;
+	if (memcmp(cur_lens, std_lens, 16) == 0)
+		ctx->is_std_vlc[1][0] = 1;
+	else
+		ctx->is_std_vlc[1][0] = 0;
+
+	cur_lens = ctx->dht_ac[1].len;
+	std_lens = std_huffman_bits_ac_chrominance;
+	if (memcmp(cur_lens, std_lens, 16) == 0)
+		ctx->is_std_vlc[1][1] = 1;
+	else
+		ctx->is_std_vlc[1][1] = 0;
 }
 
 int open_dec_bitstream(jpeg_ctx_t *ctx, const uint8_t *buf, int len)
@@ -27,7 +110,6 @@ int open_dec_bitstream(jpeg_ctx_t *ctx, const uint8_t *buf, int len)
 	uint8_t *dst;
 	uint8_t x;
 	int diff;
-
 
 	if (!ctx->in_bits_buf)
 	{

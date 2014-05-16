@@ -50,6 +50,8 @@ typedef struct {
 	PutBitContext putbit_ctx;
 	GetBitContext getbit_ctx;
 	VLC dec_vlcs[2][2];
+	VLC std_dec_vlcs[2][2];
+	uint8_t is_std_vlc[2][2];
 	int last_dc[3];
 	int new_last_dc[3];
 	int zero_index;

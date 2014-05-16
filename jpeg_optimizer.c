@@ -36,12 +36,14 @@ jpeg要点
 6 使用了ffmpeg里的码流读写和huffman多级查表算法，速度是所用软件中最快的，超过libjpeg
 7 使用30级固定量化表
 8 连续优化多张图片时，编码使用标准的huffman码表，只需生成一次
-9 连续优化多张图片时，预先生成标准huffman解码表，如果原始图片用的是标准huffman表，那么使用预生成解码表，极大节约时间（todo）
-10 连续优化多张图片时，malloc出的内存尽量移交给下一张图片使用，避免多次malloc, free （todo)
+9 连续优化多张图片时，预先生成标准huffman解码表，如果原始图片用的是标准huffman表，那么使用预生成解码表，极大节约时间
+10 连续优化多张图片时，malloc出的内存尽量移交给下一张图片使用，避免多次malloc, free
 */
 
 static void clean_global_data(jpeg_ctx_t *ctx)
 {
+	int i, j;
+
 	if (ctx)
 	{
 		if (ctx->in_bits_buf)
@@ -49,12 +51,17 @@ static void clean_global_data(jpeg_ctx_t *ctx)
 			free(ctx->in_bits_buf);
 			ctx->in_bits_buf = 0;
 		}
+
+		for (i = 0; i < 2; i++)
+			for (j = 0; j < 2; j++)
+				if (ctx->std_dec_vlcs[i][j].table)
+					free(ctx->std_dec_vlcs[i][j].table);
 	}
 }
 
 static void clean_last_data(jpeg_ctx_t *ctx)
 {
-	int i;
+	int i, j;
 
 	if (ctx)
 	{
@@ -63,31 +70,19 @@ static void clean_last_data(jpeg_ctx_t *ctx)
 			free(ctx->app1_data);
 			ctx->app1_data = 0;
 		}
+
 		if (ctx->app1_xmp_data)
 		{
 			free(ctx->app1_xmp_data);
 			ctx->app1_xmp_data = 0;
 		}
-		if (ctx->dec_vlcs[0][0].table)
-		{
-			free(ctx->dec_vlcs[0][0].table);
-			ctx->dec_vlcs[0][0].table = 0;
-		}
-		if (ctx->dec_vlcs[0][1].table)
-		{
-			free(ctx->dec_vlcs[0][1].table);
-			ctx->dec_vlcs[0][1].table = 0;
-		}
-		if (ctx->dec_vlcs[1][0].table)
-		{
-			free(ctx->dec_vlcs[1][0].table);
-			ctx->dec_vlcs[1][0].table = 0;
-		}
-		if (ctx->dec_vlcs[1][1].table)
-		{
-			free(ctx->dec_vlcs[1][1].table);
-			ctx->dec_vlcs[1][1].table = 0;
-		}
+
+		for (i = 0; i < 2; i++)
+			for (j = 0; j < 2; j++)
+				if (ctx->is_std_vlc[i][j] == 0)
+					if (ctx->dec_vlcs[i][j].table)
+						free(ctx->dec_vlcs[i][j].table);
+
 		for (i = 0; i < 3; i++)
 		{
 			ctx->last_dc[i] = 0;
@@ -209,6 +204,8 @@ int jpeg_optimizer_run(uint32_t handle, const uint8_t *input, int *input_len, ui
 	out_head_len = ret;
 	open_enc_bitstream(ctx, output + ret, *output_len - ret);
 
+	check_huffman_is_std(ctx);
+
 	ret = build_dec_vlc(ctx);
 	if (ret != 0)
 		return -1;
@@ -250,6 +247,13 @@ uint32_t jpeg_optimizer_open(int qscale)
 	ctx->qscale = qscale;
 
 	build_enc_vlc(ctx);
+
+	if (build_std_dec_vlc(ctx) != 0)
+	{
+		clean_global_data(ctx);
+		free(ctx);
+		return 0;
+	}
 
 	return (uint32_t)ctx;
 }

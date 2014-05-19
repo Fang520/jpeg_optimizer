@@ -3,6 +3,6 @@
 
 #include <stdio.h>
 
-#define log(fmt, ...) fprintf(stderr, fmt, __VA_ARGS__)
+#define log(fmt, ...) fprintf(stderr, fmt, ##__VA_ARGS__)
 
 #endif

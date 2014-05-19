@@ -145,7 +145,7 @@ int parse_header(jpeg_ctx_t *ctx, const uint8_t *data, int data_len)
 				m = *pt++;
 				ctx->rate_h[n - 1] = m >> 4;
 				ctx->rate_v[n - 1] = m & 0x0f;
-				ctx->qt_index[n - 1] = *pt++;
+				ctx->dqt_index[n - 1] = *pt++;
 			}
 			p += len + 2;
 			break;
@@ -199,8 +199,8 @@ int parse_header(jpeg_ctx_t *ctx, const uint8_t *data, int data_len)
 			{
 				n = *pt++;
 				m = *pt++;
-				ctx->ht_dc_index[n - 1] = m >> 4;
-				ctx->ht_ac_index[n - 1] = m & 0x0f;
+				ctx->dht_dc_index[n - 1] = m >> 4;
+				ctx->dht_ac_index[n - 1] = m & 0x0f;
 			}
 			p += len + 2;
 			return p - data;

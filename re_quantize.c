@@ -14,7 +14,7 @@ void prepare_middle_quant_table(jpeg_ctx_t *ctx)
 	for (i = 0; i < 3; i++)
 	{
 		mid_qt = ctx->mid_dqt[i];
-		old_qt = ctx->dqt[ctx->qt_index[i]];
+		old_qt = ctx->dqt[ctx->dqt_index[i]];
 		for (j = 1; j < 64; j++)
 		{
 			mid_qt[j] = ((uint32_t)old_qt[j] << 12) / new_qt[j];
@@ -28,7 +28,7 @@ void re_quantize(jpeg_ctx_t *ctx, int yuv_index, short mb[])
 	int i, n, dc, new_dc, new_ac;
 	uint32_t *mid_dqt;
 
-	dqt = ctx->dqt[ctx->qt_index[yuv_index]];
+	dqt = ctx->dqt[ctx->dqt_index[yuv_index]];
 	new_dqt = std_quant_table[ctx->qscale];
 	mid_dqt = ctx->mid_dqt[yuv_index];
 

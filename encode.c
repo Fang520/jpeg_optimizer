@@ -52,10 +52,10 @@ static int INLINE av_log2_c(unsigned int v)
 
 void build_enc_vlc(jpeg_ctx_t *ctx)
 {
-	make_canonical_huffman_codes(ctx->dht_dc_hash[0].size, ctx->dht_dc_hash[0].code, std_huffman_bits_dc_luminance, std_huffman_val_dc);
-	make_canonical_huffman_codes(ctx->dht_dc_hash[1].size, ctx->dht_dc_hash[1].code, std_huffman_bits_dc_chrominance, std_huffman_val_dc);
-	make_canonical_huffman_codes(ctx->dht_ac_hash[0].size, ctx->dht_ac_hash[0].code, std_huffman_bits_ac_luminance, std_huffman_val_ac_luminance);
-	make_canonical_huffman_codes(ctx->dht_ac_hash[1].size, ctx->dht_ac_hash[1].code, std_huffman_bits_ac_chrominance, std_huffman_val_ac_chrominance);
+	make_canonical_huffman_codes(ctx->dht_dc_vlcs[0].size, ctx->dht_dc_vlcs[0].code, std_huffman_bits_dc_luminance, std_huffman_val_dc);
+	make_canonical_huffman_codes(ctx->dht_dc_vlcs[1].size, ctx->dht_dc_vlcs[1].code, std_huffman_bits_dc_chrominance, std_huffman_val_dc);
+	make_canonical_huffman_codes(ctx->dht_ac_vlcs[0].size, ctx->dht_ac_vlcs[0].code, std_huffman_bits_ac_luminance, std_huffman_val_ac_luminance);
+	make_canonical_huffman_codes(ctx->dht_ac_vlcs[1].size, ctx->dht_ac_vlcs[1].code, std_huffman_bits_ac_chrominance, std_huffman_val_ac_chrominance);
 }
 
 void encode_dc(jpeg_ctx_t *ctx, int yuv_index, short mb[])
@@ -68,8 +68,8 @@ void encode_dc(jpeg_ctx_t *ctx, int yuv_index, short mb[])
 
 	val = mb[0];
 	pb = &ctx->putbit_ctx;
-	huff_size = ctx->dht_dc_hash[yuv_index ? 1 : 0].size;
-	huff_code = ctx->dht_dc_hash[yuv_index ? 1 : 0].code;
+	huff_size = ctx->dht_dc_vlcs[yuv_index ? 1 : 0].size;
+	huff_code = ctx->dht_dc_vlcs[yuv_index ? 1 : 0].code;
 
 	if (val == 0)
 	{
@@ -101,8 +101,8 @@ void encode_ac(jpeg_ctx_t *ctx, int yuv_index, short mb[])
 	uint16_t *huff_code;
 
 	pb = &ctx->putbit_ctx;
-	huff_size = ctx->dht_ac_hash[yuv_index ? 1 : 0].size;
-	huff_code = ctx->dht_ac_hash[yuv_index ? 1 : 0].code;
+	huff_size = ctx->dht_ac_vlcs[yuv_index ? 1 : 0].size;
+	huff_code = ctx->dht_ac_vlcs[yuv_index ? 1 : 0].code;
 
 	run = 0;
 	last_index = ctx->zero_index;

@@ -168,7 +168,7 @@ static int process_body(jpeg_ctx_t *ctx)
 	return 0;
 }
 
-int jpeg_optimizer_run(uint32_t handle, const uint8_t *input, int *input_len, uint8_t *output, int *output_len)
+int jpeg_optimizer_run(intptr_t handle, const uint8_t *input, int *input_len, uint8_t *output, int *output_len)
 {
 	jpeg_ctx_t *ctx;
 	int ret, out_head_len, in_head_len;
@@ -226,7 +226,7 @@ int jpeg_optimizer_run(uint32_t handle, const uint8_t *input, int *input_len, ui
 	return 0;
 }
 
-uint32_t jpeg_optimizer_open(int qscale)
+intptr_t jpeg_optimizer_open(int qscale)
 {
 	jpeg_ctx_t *ctx;
 
@@ -255,10 +255,10 @@ uint32_t jpeg_optimizer_open(int qscale)
 		return 0;
 	}
 
-	return (uint32_t)ctx;
+	return (intptr_t)ctx;
 }
 
-void jpeg_optimizer_close(uint32_t handle)
+void jpeg_optimizer_close(intptr_t handle)
 {
 	jpeg_ctx_t *ctx;
 

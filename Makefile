@@ -1,6 +1,6 @@
 CC	:=gcc
 CFLAGS	:=-O3 -Wall
-SRCS	:=*.c
+SRCS	:=src/*.c
 OBJS	:=$(patsubst %.c,%.o,$(wildcard $(SRCS)))
 LIBS	:=
 

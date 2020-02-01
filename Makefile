@@ -1,3 +1,4 @@
+PNAME	:=jpegbaseopt
 CC	:=gcc
 CFLAGS	:=-O3 -Wall
 SRCS	:=src/*.c
@@ -10,7 +11,7 @@ LIBS	:=
 .PHONY: all clean
 
 all:$(OBJS)
-	$(CC) -o jpeg_optimizer $^ $(LIBS)
+	$(CC) -o $(PNAME) $^ $(LIBS)
 
 clean:
-	rm jpeg_optimizer $(OBJS)
+	rm -f $(PNAME) $(OBJS)

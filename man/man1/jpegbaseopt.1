@@ -1,0 +1,32 @@
+.TH "jpegbaseopt" 1 "01 Feb 2020" "0.20200201" "User Manual"
+
+.SH NAME
+jpegbaseopt
+
+.SH SYNOPSIS
+\fBjpegbaseopt\fR input.jpg output.jpg [qscale=1]
+
+.SH DESCRIPTION
+Baseline JPEG optimizer.
+JPEG lossy optimization by changing the quantization matrix.
+
+.SH EXAMPLE
+ \fBjpegtran\fR -copy none -optimize -outfile input.jpg you_image.jpg
+ \fBjpegbaseopt\fR input.jpg output.jpg [qscale=1]
+ \fBjpegtran\fR -progressive -copy none -optimize -outfile you_image.jpg output.jpg
+
+.SH COPYRIGHT
+ Copyright (C) 2014, Fang520
+ Modify 2019-2020, zvezdochiot
+ Public Domain Mark 1.0
+
+.SH SEE ALSO
+ cjpeg(1),
+ djpeg(1),
+ jpegtran(1),
+ jpegqs(1),
+ jpeg-recompress(1).
+
+.SH CONTACTS
+Website:
+ \fIhttps://github.com/Fang520/jpeg_optimizer\fR
